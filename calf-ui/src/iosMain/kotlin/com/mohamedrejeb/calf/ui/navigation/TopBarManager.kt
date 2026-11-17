@@ -11,6 +11,7 @@ import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.ObjCAction
 import platform.UIKit.UIAction
+import platform.UIKit.setAccessibilityLabel
 import platform.UIKit.UIBarButtonItem
 import platform.UIKit.UIBarButtonItemStyle
 import platform.UIKit.UIBarButtonSystemItem
@@ -93,6 +94,7 @@ internal class TopBarManager(
         if (configuration != currentConfiguration) {
             navBar.prefersLargeTitles = configuration.prefersLargeTitles
             navBar.translucent = configuration.isTranslucent
+            if (configuration.tintColor.isSpecified) navBar.tintColor = configuration.tintColor.toUIColor()
 
             val appearance = UINavigationBarAppearance().apply {
                 if (!isLiquidGlassEnabled) {
@@ -134,6 +136,14 @@ internal class BarButtonActionHandler(
 
 @OptIn(ExperimentalForeignApi::class)
 internal fun UIKitUIBarButtonItem.toUIBarButtonItem(
+    actionHandler: BarButtonActionHandler,
+    density: Float,
+): UIBarButtonItem = createUIBarButtonItem(actionHandler, density).also { item ->
+    accessibilityLabel?.let { item.setAccessibilityLabel(it) }
+}
+
+@OptIn(ExperimentalForeignApi::class)
+private fun UIKitUIBarButtonItem.createUIBarButtonItem(
     actionHandler: BarButtonActionHandler,
     density: Float,
 ): UIBarButtonItem {
