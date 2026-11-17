@@ -50,12 +50,12 @@ internal class TabBarManager(
             }
             tabBar.setItems(uiKitItems)
             currentItems = items
-            val safeSelectedIndex = selectedIndex.coerceIn(uiKitItems.indices)
-            tabBar.selectedItem = uiKitItems[safeSelectedIndex]
+            tabBar.selectedItem = uiKitItems.getOrNull(selectedIndex)
         } else {
             val uiKitItems = tabBar.items?.filterIsInstance<UITabBarItem>() ?: return
-            val safeSelectedIndex = selectedIndex.coerceIn(uiKitItems.indices)
-            tabBar.selectedItem = uiKitItems[safeSelectedIndex]
+            // An index outside the items (the app shows a destination that is not a tab)
+            // clears the selection instead of highlighting an unrelated first or last tab.
+            tabBar.selectedItem = uiKitItems.getOrNull(selectedIndex)
         }
     }
 

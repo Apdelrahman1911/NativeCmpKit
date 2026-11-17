@@ -6,6 +6,7 @@ import com.mohamedrejeb.calf.core.*
 import com.mohamedrejeb.calf.ui.dialog.uikit.*
 import com.mohamedrejeb.calf.ui.utils.*
 import kotlinx.cinterop.*
+import platform.CoreGraphics.CGRectMake
 import platform.UIKit.*
 import platform.darwin.NSObject
 import platform.objc.sel_registerName
@@ -53,8 +54,9 @@ class AlertDialogManager internal constructor(
     @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
     private val dialogUIViewController: UIViewController by lazy {
         UIAlertController.alertControllerWithTitle(
-            title = iosProperties.title,
-            message = iosProperties.text,
+            // An empty string still reserves a title/message row; nil omits it, as UIKit apps do.
+            title = iosProperties.title.ifEmpty { null },
+            message = iosProperties.text.ifEmpty { null },
             preferredStyle = iosProperties.style.toUIAlertControllerStyle()
         ).apply {
             iosProperties.actions.forEach { action ->
@@ -124,8 +126,8 @@ class AlertDialogManager internal constructor(
     internal fun updateDialogProperties() {
         val controller = dialogUIViewController as? UIAlertController ?: return
 
-        controller.title = iosProperties.title
-        controller.message = iosProperties.text
+        controller.title = iosProperties.title.ifEmpty { null }
+        controller.message = iosProperties.text.ifEmpty { null }
 
         val actions = iosProperties.actions
         for (i in actions.indices) {
@@ -175,6 +177,17 @@ class AlertDialogManager internal constructor(
         isAnimating = true
 
         dialogUIViewController.applyLayoutDirection(layoutDirection)
+
+        // On iPad (and Mac Catalyst) an action sheet is a popover and UIKit raises an exception when
+        // it has no anchor. Without a caller-supplied anchor, centre it in the presenting view.
+        dialogUIViewController.popoverPresentationController?.let { popover ->
+            val anchor = parentUIViewController.view
+            popover.sourceView = anchor
+            popover.sourceRect = anchor.bounds.useContents {
+                CGRectMake(size.width / 2, size.height / 2, 0.0, 0.0)
+            }
+            popover.permittedArrowDirections = 0u
+        }
 
         parentUIViewController.presentViewController(
             viewControllerToPresent = dialogUIViewController,

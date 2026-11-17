@@ -28,7 +28,8 @@ import com.mohamedrejeb.calf.ui.ExperimentalCalfUiApi
  * @param tonalElevation The tonal elevation of this navigation bar.
  * @param windowInsets The window insets to be applied to the navigation bar.
  * @param iosItems The list of tab bar items for the iOS UITabBar.
- * @param iosSelectedIndex The index of the currently selected item on iOS.
+ * @param iosSelectedIndex The index of the currently selected item on iOS. An index outside
+ *   [iosItems] (for example -1) shows no selected item.
  * @param iosOnItemSelected Callback invoked when an item is selected on iOS, with the item index.
  * @param iosConfiguration Configuration for the iOS UITabBar appearance (item tint colors, translucency).
  * @param content The content of the navigation bar on Material platforms, typically
