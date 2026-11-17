@@ -190,9 +190,12 @@ class AlertDialogManager internal constructor(
 
         dialogUIViewController.applyLayoutDirection(layoutDirection)
 
-        // On iPad (and Mac Catalyst) an action sheet is a popover and UIKit raises an exception when
-        // it has no anchor. Without a caller-supplied anchor, centre it in the presenting view.
-        dialogUIViewController.popoverPresentationController?.let { popover ->
+        // On iPad an action sheet is a popover and UIKit raises an exception when it has no anchor:
+        // centre it in the presenting view. iPhone must keep the system sheet (setting an anchor
+        // there turns it into a centred popover without its Cancel button on iOS 26).
+        val needsAnchor = iosProperties.style == AlertDialogIosStyle.ActionSheet &&
+            UIDevice.currentDevice.userInterfaceIdiom != UIUserInterfaceIdiomPhone
+        if (needsAnchor) dialogUIViewController.popoverPresentationController?.let { popover ->
             val anchor = parentUIViewController.view
             popover.sourceView = anchor
             popover.sourceRect = anchor.bounds.useContents {
