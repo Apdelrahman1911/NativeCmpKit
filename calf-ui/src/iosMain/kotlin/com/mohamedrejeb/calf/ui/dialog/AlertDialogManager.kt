@@ -151,11 +151,23 @@ class AlertDialogManager internal constructor(
         )
     }
 
-    /**
-     * Pointer to the [dismiss] method.
-     */
     @OptIn(ExperimentalForeignApi::class)
-    private val dismissPointer = sel_registerName("dismiss")
+    private val outsideTapPointer = sel_registerName("dismissOnOutsideTap:")
+
+    /**
+     * Dismisses the dialog for a tap on the dimmed area around it. The recognizer sits on the
+     * alert's container, so it also sees taps on the alert itself; those belong to UIKit (an
+     * action button or a text field) and must not dismiss the dialog without running the action.
+     */
+    @OptIn(BetaInteropApi::class, ExperimentalForeignApi::class)
+    @ObjCAction
+    fun dismissOnOutsideTap(recognizer: UITapGestureRecognizer) {
+        val alertView = dialogUIViewController.view
+        val inside = recognizer.locationInView(alertView).useContents { alertView.bounds.useContents {
+            x >= 0.0 && y >= 0.0 && x <= size.width && y <= size.height
+        } }
+        if (!inside) dismiss()
+    }
 
     /**
      * Dismisses the dialog.
@@ -201,8 +213,11 @@ class AlertDialogManager internal constructor(
                     dialogUIViewController.view.superview?.addGestureRecognizer(
                         UITapGestureRecognizer(
                             target = this,
-                            action = dismissPointer
-                        )
+                            action = outsideTapPointer
+                        ).apply {
+                            // Never swallow touches meant for the alert's own buttons and fields.
+                            cancelsTouchesInView = false
+                        }
                     )
                 }
             }
