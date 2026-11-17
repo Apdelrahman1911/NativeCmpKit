@@ -29,6 +29,7 @@ import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.platform.LocalLayoutDirection
 import com.mohamedrejeb.calf.ui.ExperimentalCalfUiApi
 import com.mohamedrejeb.calf.ui.utils.applyLayoutDirection
+import com.mohamedrejeb.calf.ui.utils.isIOSVersionAtLeast
 import com.mohamedrejeb.calf.ui.utils.toUIImage
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -38,7 +39,6 @@ import platform.UIKit.UIButton
 import platform.UIKit.UIButtonTypePlain
 import platform.UIKit.UIColor
 import platform.UIKit.UIControlStateNormal
-import platform.UIKit.UIDevice
 import platform.UIKit.UIEvent
 import platform.UIKit.UIGestureRecognizer
 import platform.UIKit.UIMenu
@@ -194,9 +194,6 @@ private fun AdaptiveDropDownItem.toUIAction(density: Float): UIAction {
     return action
 }
 
-private fun isPerformPrimaryActionAvailable(): Boolean {
-    val systemVersion = UIDevice.currentDevice.systemVersion
-    val major = systemVersion.split(".").firstOrNull()?.toIntOrNull() ?: 0
-    val minor = systemVersion.split(".").getOrNull(1)?.toIntOrNull() ?: 0
-    return major >= 17 && minor >= 4
-}
+// UIControl.performPrimaryAction() exists since iOS 17.4. A minor-only comparison
+// (`major >= 17 && minor >= 4`) wrongly rejected 18.0, 26.0 and every later x.0-x.3.
+private fun isPerformPrimaryActionAvailable(): Boolean = isIOSVersionAtLeast(17, 4)

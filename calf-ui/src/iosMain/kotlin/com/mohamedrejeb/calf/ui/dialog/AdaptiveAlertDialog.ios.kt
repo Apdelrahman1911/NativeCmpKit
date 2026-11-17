@@ -66,7 +66,7 @@ actual fun AdaptiveAlertDialog(
     val alertDialogManager = remember(currentUIViewController) {
         AlertDialogManager(
             parentUIViewController = currentUIViewController,
-            onDismissRequest = onConfirm,
+            onDismissRequest = onDismiss,
             iosProperties = createIosDialogProperties(),
             properties = properties,
             layoutDirection = layoutDirection,

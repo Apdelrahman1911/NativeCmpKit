@@ -58,7 +58,19 @@ class AlertDialogManager internal constructor(
             preferredStyle = iosProperties.style.toUIAlertControllerStyle()
         ).apply {
             iosProperties.actions.forEach { action ->
-                val uiAlertAction = action.toUIAlertAction()
+                val uiAlertAction = UIAlertAction.actionWithTitle(
+                    title = action.title,
+                    style = action.style.toUIAlertActionStyle(),
+                    handler = {
+                        // UIKit dismisses the controller itself before running an action handler.
+                        // Record that, so disposing the dialog afterwards neither dismisses a
+                        // controller that is no longer presented (which UIKit forwards to the
+                        // presenting controller) nor reports a second, spurious dismiss request.
+                        isPresented = false
+                        isAnimating = false
+                        action.onClick()
+                    },
+                )
                 uiAlertAction.enabled = action.enabled
                 addAction(uiAlertAction)
 
