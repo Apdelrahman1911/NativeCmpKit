@@ -15,5 +15,5 @@ fun Project.javaFxDependencies(): List<String> {
         else -> error("JavaFX desktop runtime is unsupported on $os/$arch")
     }
     return listOf("base", "graphics", "controls", "media", "web", "swing")
-        .map { "org.openjfx:javafx-$it:19:$classifier" }
+        .map { "org.openjfx:javafx-$it:21.0.13:$classifier" }
 }

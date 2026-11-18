@@ -27,7 +27,7 @@ done
 test "$(adb shell getprop sys.boot_completed | tr -d '\r')" = 1
 test "$(adb shell getprop ro.build.version.sdk | tr -d '\r')" = "$api"
 adb shell input keyevent 82
-adb shell dumpsys webviewupdate
+adb shell dumpsys webviewupdate || true
 
 ./gradlew -p "$project" --no-daemon --max-workers=1 \
     '-Dorg.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8' -Pkotlin.compiler.execution.strategy=in-process \

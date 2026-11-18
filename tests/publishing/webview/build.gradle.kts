@@ -16,7 +16,7 @@ val pomOnly = providers.gradleProperty("nativecmpkitMetadataMode").orNull == "po
 val metadataMode = if (pomOnly) "pom" else "module"
 layout.buildDirectory.set(layout.projectDirectory.dir("build/$metadataMode"))
 val desktopArtifact = "kira-webview-desktop"
-val jfxVersion = "19"
+val jfxVersion = "21.0.13"
 val os = System.getProperty("os.name").lowercase()
 val arch = System.getProperty("os.arch").lowercase()
 val arm64 = arch in setOf("arm64", "aarch64")

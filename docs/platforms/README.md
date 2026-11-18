@@ -41,7 +41,7 @@ requires the corresponding audit findings and platform verification.
 | Coil file adapter | I: whole-byte fetch | I: whole-byte fetch | I: whole-byte fetch | I: whole-byte fetch | I: whole-byte fetch |
 | Camera capture | I: TakePicture + FileProvider | I: UIImagePickerController | **S: launch no-op** | **S: launch no-op** | **S: launch no-op** |
 | Share text/URL/files | I/L: Android intents | I: activity controller | I macOS sheet; L Windows/Linux fallback | I/L: Web Share/clipboard | I/L: Web Share/clipboard |
-| WebView | I: Android WebView | I: WKWebView | I/L: JavaFX 19 + Swing | L: iframe/same-origin rules | L: iframe/same-origin rules |
+| WebView | I: Android WebView | I: WKWebView | I/L: JavaFX 21 + Swing | L: iframe/same-origin rules | L: iframe/same-origin rules |
 | Cookies | I/L: Android cookie store | I/L: WK cookie store | I/L: Java cookie handler | L: document.cookie | L: document.cookie |
 | Adaptive controls | I: Material3 | I/L: UIKit + Compose Cupertino/glass | I: Material3, **not native desktop widgets** | I: Material3 | I: Material3 |
 | Native bar integration | —: Material layout | L: host-controller overlays | —: Material layout | —: Material layout | —: Material layout |

@@ -2,7 +2,7 @@
 
 Desktop is the JVM `desktop` target with Java 17, not macOS/Linux/Windows
 Kotlin/Native. Core/file code uses JVM APIs, adaptive widgets are Material3
-Compose, picker/share can cross JNI, and WebView embeds JavaFX 19 through Swing.
+Compose, picker/share can cross JNI, and WebView embeds JavaFX 21 through Swing.
 That combination has several independent threading and native packaging models.
 
 ## Thread and lifecycle map
@@ -51,7 +51,7 @@ documented action rather than imaginary recipient delivery.
 
 ## JavaFX-specific prerequisites
 
-`kira-webview` compiles against JavaFX 19. Desktop applications that use
+`kira-webview` compiles against JavaFX 21.0.13. Desktop applications that use
 `kira-webview` must supply the JavaFX `base`, `graphics`, `controls`,
 `media`, `web`, and `swing` modules for the target operating system and
 architecture. Use the same version and classifier for all six. The desktop
