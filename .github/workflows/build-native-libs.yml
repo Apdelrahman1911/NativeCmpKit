@@ -141,22 +141,34 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: gh run download "$GITHUB_RUN_ID" --name maven-candidate --dir build/candidate-maven
+      - name: Install Linux graphical runtime dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-0t64 libgl1 libgl1-mesa-dri libxrender1 libxtst6 libxi6 libxrandr2
       - name: Exercise the published WebView with both Gradle and Maven metadata
         shell: bash
         run: |
           version="$(python -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')"
           runner=()
           if [ "$RUNNER_OS" = Linux ]; then runner=(xvfb-run -a); fi
+          status=0
           for mode in module pom; do
             "${runner[@]}" ./gradlew -p tests/publishing/webview --no-daemon --max-workers=1 \
               '-Dorg.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8' \
               -Pkotlin.compiler.execution.strategy=in-process \
               -PnativecmpkitVersion="$version" -PnativecmpkitRepository="$PWD/build/candidate-maven" \
-              -PnativecmpkitMetadataMode="$mode" test
+              -PnativecmpkitMetadataMode="$mode" test || status=1
           done
+          exit "$status"
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: webview-desktop-${{ matrix.runner }}-results
+          path: tests/publishing/webview/build/*/test-results/test/TEST-*.xml
 
   candidate-notices:
-    needs: [stage-maven, webview-consumer]
+    needs: [stage-maven, webview-consumer, webview-browser, webview-android, webview-ios]
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -169,3 +181,95 @@ jobs:
         run: gh run download "$GITHUB_RUN_ID" --name maven-candidate --dir build/candidate-maven
       - name: Check the accompanying locked native license materials
         run: python3 scripts/publishing/verify_candidate.py --repository build/candidate-maven --require-native-notices
+
+  webview-browser:
+    needs: stage-maven
+    if: ${{ always() && needs.stage-maven.outputs.candidate-artifact != '' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Retrieve the exact Maven candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download "$GITHUB_RUN_ID" --name maven-candidate --dir build/candidate-maven
+      - name: Run the independent JS and Wasm browser WebView tests
+        run: |
+          version="$(python3 -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')"
+          ./gradlew -p tests/publishing/webview-browser --no-daemon --max-workers=1 \
+            '-Dorg.gradle.jvmargs=-Xmx3072m -Dfile.encoding=UTF-8' -Pkotlin.compiler.execution.strategy=in-process \
+            -PnativecmpkitVersion="$version" -PnativecmpkitRepository="$PWD/build/candidate-maven" \
+            jsBrowserTest wasmJsBrowserTest
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: webview-browser-results
+          path: tests/publishing/webview-browser/build/test-results/**/TEST-*.xml
+
+  webview-android:
+    needs: stage-maven
+    if: ${{ always() && needs.stage-maven.outputs.candidate-artifact != '' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        api: [23, 35]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Retrieve the exact Maven candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download "$GITHUB_RUN_ID" --name maven-candidate --dir build/candidate-maven
+      - name: Run the independent Android WebView instrumentation test
+        env:
+          ANDROID_API: ${{ matrix.api }}
+        run: |
+          version="$(python3 -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')"
+          bash tests/publishing/webview-android/run-hosted.sh "$PWD/build/candidate-maven" "$version" "$ANDROID_API"
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: webview-android-${{ matrix.api }}-results
+          path: |
+            tests/publishing/webview-android/build/outputs/androidTest-results/**/TEST-*.xml
+            tests/publishing/webview-android/build/emulator.log
+
+  webview-ios:
+    needs: stage-maven
+    if: ${{ always() && needs.stage-maven.outputs.candidate-artifact != '' }}
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Retrieve the exact Maven candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download "$GITHUB_RUN_ID" --name maven-candidate --dir build/candidate-maven
+      - name: Run the standalone iOS simulator app against published WKWebView
+        run: |
+          version="$(python3 -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')"
+          bash tests/publishing/webview-ios/run-hosted.sh "$PWD/build/candidate-maven" "$version"
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: webview-ios-results
+          path: tests/publishing/webview-ios/build/webview-console.log

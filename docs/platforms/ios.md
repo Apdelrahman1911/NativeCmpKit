@@ -8,7 +8,7 @@ Linux source inspection establishes simulator/device test success.
 ## Framework and Objective-C ownership
 
 The sample builds a static `Common` framework from `sample/common`; it explicitly
-exports `calf-ui` in `sample/common/build.gradle.kts`. UIKit target/action and
+exports `kira-ui` in `sample/common/build.gradle.kts`. UIKit target/action and
 Kotlin-exported selectors have historically produced `unrecognized selector`
 failures (#189/#210/#330/#341/#381). Do not remove the framework export or change
 Objective-C-visible symbols without an actual consuming-Xcode-app test.
@@ -95,11 +95,11 @@ documented audit issues.
 ## WebKit and native boundaries
 
 WebView uses WKWebView plus KVO observations and navigation callbacks. The
-handwritten Objective-C protocol in `calf-webview/src/iosMain/cinterop/
+handwritten Objective-C protocol in `kira-webview/src/iosMain/cinterop/
 nskeyvalueobserving.def` produces compiler bindings for the KVO receiver. Every
 observer attachment needs safe matching removal; the WK cookie store and
 JavaScript callback lifetime must stay associated with the correct view.
-Historical #34 is about camera UI *inside WebView*, not `calf-camera-picker`;
+Historical #34 concerns camera UI inside WebView;
 its exact dismissal behavior still needs a native reproduction.
 
 ## Verification needed

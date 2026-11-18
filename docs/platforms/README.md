@@ -1,9 +1,8 @@
 # Platform capabilities: implemented is not verified
 
-This matrix comes from baseline `af388bd` actual implementations and build
-configuration, not the upstream README's platform badges. “Implemented” means a
-code path exists; it does **not** mean all edge cases work, a native test passed,
-or a package was published. See [testing](../testing/README.md) for actual runs.
+This matrix describes NativeCmpKit target declarations and the capabilities of
+the Kira modules. See [testing](../testing/README.md) for executed verification.
+The [installation guide](../installation.md) tracks Maven Central availability.
 
 ## Target and host matrix
 
@@ -59,16 +58,16 @@ mobile picker may exist but have confirmed correctness defects.
 
 ### Source evidence for unsupported/limited cells
 
-- Camera: `calf-camera-picker/src/{desktopMain,webMain}/.../CameraPickerLauncher.*.kt`.
-- Permissions: `calf-permissions/core/src/{desktopMain,jsMain,wasmJsMain}/.../
+- Camera: `kira-camera-picker/src/{desktopMain,webMain}/.../CameraPickerLauncher.*.kt`.
+- Permissions: `kira-permissions/core/src/{desktopMain,jsMain,wasmJsMain}/.../
   MutablePermissionState.*.kt`, corresponding multiple-state implementations,
   and no-op feature registration actuals.
-- Geo: five platform `LocationTracker` actuals under `calf-geo/src`; only Android
+- Geo: platform `LocationTracker` actuals under `kira-geo/src`; only Android
   creates real native updates, and those updates are not wired into public state.
 - Maps/media/notifications: absence from relevant source trees and/or
   `settings.gradle.kts`; discussed in native-features report.
-- Web IO/saving: `calf-io/src/webMain/.../KmpFileSource.web.kt` and
-  `calf-file-picker/src/webMain/.../FileSaverLauncher.web.kt`, with separate
+- Web IO/saving: `kira-io/src/webMain/.../KmpFileSource.web.kt` and
+  `kira-file-picker/src/webMain/.../FileSaverLauncher.web.kt`, with separate
   JS/Wasm Blob interop helpers.
 - Navigation: common `AdaptiveNavHostController`, platform `AndroidBackHandler`
   actuals, and absence of a native navigation-controller/browser-history adapter.
@@ -81,22 +80,16 @@ Picker/share Gradle host mapping names these resource directories/triples:
 
 | Directory | Rust target | Picker binary name |
 |---|---|---|
-| `macos-arm64` | `aarch64-apple-darwin` | `libcalf_filepicker_native.dylib` |
+| `macos-arm64` | `aarch64-apple-darwin` | `libkira_filepicker_native.dylib` |
 | `macos-x64` | `x86_64-apple-darwin` | same basename |
-| `windows-x64` | `x86_64-pc-windows-msvc` | `calf_filepicker_native.dll` |
-| `linux-x64` | `x86_64-unknown-linux-gnu` | `libcalf_filepicker_native.so` |
+| `windows-x64` | `x86_64-pc-windows-msvc` | `kira_filepicker_native.dll` |
+| `linux-x64` | `x86_64-unknown-linux-gnu` | `libkira_filepicker_native.so` |
 | `linux-arm64` | `aarch64-unknown-linux-gnu` | same basename |
 
-Share uses the corresponding `calf_share_native` basename; availability of a
-build task is not availability of a native share UI. Windows ARM64, 32-bit JVMs,
-musl Linux and unusual `os.arch` aliases require explicit investigation. JavaFX
-classifiers are constructed separately in `calf-webview/build.gradle.kts`; the
-picker's host support does not establish the WebView's support.
-
-The audited Git tree contains **no tracked `.so`, `.dll` or `.dylib` payloads**.
-This table maps build/loader expectations, not shipped binaries. The historical
-packaging matrix also differs from the loader's host matrix (BUILD-004); a source
-checkout and a complete multi-host Maven artifact are separate deliverables.
+Share uses the `kira_share_native` basename on the same hosts. These five hosts
+are the native Maven payload matrix. Native share UI is available on macOS, with
+fallbacks on Windows and Linux. Desktop WebView applications select their JavaFX
+classifiers separately. See [desktop setup](desktop.md#javafx-specific-prerequisites).
 
 ## Platform guides
 

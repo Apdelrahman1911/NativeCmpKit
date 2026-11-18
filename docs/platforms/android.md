@@ -51,7 +51,7 @@ Only the notifications feature includes its own
 `android.permission.POST_NOTIFICATIONS` manifest declaration. Other required
 manifest entries remain the app's responsibility. `RemoteNotification` is an iOS
 APNs concept and is not Android push registration. Included notification
-permissions must not be confused with excluded `calf-notifications`, which is not
+permissions must not be confused with excluded `kira-notifications`, which is not
 a notification scheduling API.
 
 Test both grant and revoke changes across `ON_RESUME`, permanently denied cases,
@@ -75,8 +75,8 @@ feature findings for actual settings/error/cookie behavior.
 
 Geo's Android actual uses FusedLocationProviderClient and a lifecycle observer,
 but received updates go to private channels rather than the public Compose
-states. It remains an unpublished prototype, not functioning cross-platform
-tracking. Background entitlement/permission and Play Services availability are
+states. Its Maven module exposes the existing experimental APIs. Background
+entitlement/permission and Play Services availability are
 additional constraints, not fixes for that source-level wiring defect.
 
 ## Required verification

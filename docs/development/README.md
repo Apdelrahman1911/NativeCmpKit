@@ -1,4 +1,4 @@
-# nativeCmpkit development after the audit
+# NativeCmpKit development after the audit
 
 The owner authorized fixes, library-level testing, efficient multi-platform CI and
 the first **verified** preview on 2026-10-24. This is the live development record;
@@ -42,9 +42,7 @@ release/package publication, verify applicable issue fixes, runtime/native libra
 tests, stable cross-platform CI, packaged consumer fixtures, API compatibility,
 native payload completeness/provenance, resolved dependency safety and artifact
 licensing. Record exact versions, source SHA, task/test counts, hashes and limits.
-No preview has been published by this phase at the time this document was started.
-
-GitHub Packages can use a purpose-scoped Actions token and authenticated Maven
-consumer configuration; unavailable Central credentials must not be represented
-as a successful Central publication. Publication workflow templates stay outside
-active workflows until all required gates pass. Documentation hosting stays off.
+Maven Central is the first release destination. The [coordinate inventory](../publishing/coordinates.json)
+defines the full 23-component candidate. The read-only verification workflow
+stages a local Maven repository and independent consumers. It has no publication
+credentials. The [installation guide](../installation.md) tracks release status.

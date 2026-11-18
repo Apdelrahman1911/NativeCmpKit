@@ -9,4 +9,5 @@ internal expect fun <T : HTMLElement> KiraWebElementView(
     factory: () -> T,
     modifier: Modifier,
     update: (T) -> Unit,
+    onRelease: (T) -> Unit,
 )

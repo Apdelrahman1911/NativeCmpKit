@@ -36,10 +36,15 @@ def check_pom(path, module, coordinate):
         return parent.findtext("/".join(f"m:{part}" for part in tag.split("/")), namespaces=POM_NAMESPACE)
 
     pom = ElementTree.parse(path).getroot()
+    repository = MANIFEST["repository"]
+    repository_url = f"https://github.com/{repository}"
     for key, expected in (
         ("groupId", GROUP), ("artifactId", coordinate), ("version", VERSION),
         ("developers/developer/name", MANIFEST["maintainer"]), ("licenses/license/name", "Apache-2.0"),
-        ("name", f"NativeCmpKit {module}"), ("url", f"https://github.com/{MANIFEST['repository']}"),
+        ("name", f"{MANIFEST['name']} {module}"), ("url", repository_url),
+        ("issueManagement/url", f"{repository_url}/issues"),
+        ("scm/url", repository_url), ("scm/connection", f"scm:git:{repository_url}.git"),
+        ("scm/developerConnection", f"scm:git:ssh://git@github.com/{repository}.git"),
     ):
         if field(pom, key) != expected:
             raise ValueError(f"{path.name}: unexpected {key} for {coordinate}")
@@ -53,8 +58,12 @@ def check_pom(path, module, coordinate):
             raise ValueError(f"{coordinate} captured a producer JavaFX dependency")
 
 
-def check_module(path, group_dir, module):
+def check_module(path, group_dir, module, coordinate):
     data = json.loads(path.read_text())
+    component = data["component"]
+    expected_component = module if "url" in component else coordinate
+    if (component["group"], component["module"], component["version"]) != (GROUP, expected_component, VERSION):
+        raise ValueError(f"{path.name} references the wrong publication: {component}")
     allowed = set().union(*(components(name) for name in closure(module)))
     redirects = set()
     for variant in data["variants"]:
@@ -91,7 +100,7 @@ def verify_repository(repository):
             directory = group_dir / coordinate / VERSION
             base = directory / f"{coordinate}-{VERSION}"
             check_pom(Path(f"{base}.pom"), module, coordinate)
-            redirects = check_module(Path(f"{base}.module"), group_dir, module)
+            redirects = check_module(Path(f"{base}.module"), group_dir, module, coordinate)
             if not target and redirects != components(module) - {module}:
                 raise ValueError(f"{coordinate} is missing Kotlin target redirects: {redirects}")
             for suffix in (

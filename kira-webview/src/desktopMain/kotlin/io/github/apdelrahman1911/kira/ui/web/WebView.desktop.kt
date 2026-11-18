@@ -62,6 +62,11 @@ actual fun WebView(
             }
             val engine = wv.engine
 
+            // JavaFX can report SUCCEEDED before it publishes the document title.
+            engine.titleProperty().addListener(ChangeListener { _, _, title ->
+                if (attached.get()) state.pageTitle = title
+            })
+
             engine.loadWorker.stateProperty().addListener(ChangeListener { _, _, newState ->
                 if (!attached.get()) return@ChangeListener
                 when (newState) {
@@ -251,7 +256,7 @@ internal suspend fun WebViewNavigator.handleNavigationEvents(
                     is WebViewNavigator.NavigationEvent.Reload ->
                         reload()
                     is WebViewNavigator.NavigationEvent.StopLoading ->
-                        stopLoading()
+                        loadWorker.cancel()
                     is WebViewNavigator.NavigationEvent.LoadHtml ->
                         loadContent(event.html, event.mimeType)
                     is WebViewNavigator.NavigationEvent.LoadUrl -> {

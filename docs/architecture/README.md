@@ -2,13 +2,12 @@
 
 ## Scope and how to use this knowledge base
 
-This is a source-based map of upstream baseline
-`af388bd3ad0325b2afdd8c0149cb7ff6f24c5da6`, imported into **nativeCmpkit**.
-Migration identity, attribution and build-safety changes are described separately in
-[migration](../migration/README.md). Existing `calf-*` Gradle paths and
-`com.mohamedrejeb.calf` public packages are compatibility boundaries, not a runtime
-dependency on the old GitHub repository. Refer to an immutable source file with
-`git show af388bd:<path>`; line numbers in audit findings refer to that baseline.
+NativeCmpKit uses `kira-*` artifact IDs and
+`io.github.apdelrahman1911.kira` Kotlin packages. See the [installation and migration
+guide](../installation.md) for the current coordinates and import changes.
+The detailed audit and its counts describe upstream commit
+`af388bd3ad0325b2afdd8c0149cb7ff6f24c5da6`. Historical paths and line numbers refer
+to that revision and can be opened with `git show af388bd:<path>`.
 
 Read this overview, then [execution flows](execution-flows.md),
 [dependencies](dependency-map.md), [source inventory](source-inventory.md), and the
@@ -23,7 +22,7 @@ function-by-function analysis, defects, tests and limitations:
 | Camera, share, WebView, cookie stores, excluded prototypes | [Native features](../modules/native-features.md) |
 | Core contexts, navigation, symbols/font, sample app | [Navigation/core/icons/sample](../modules/navigation-core-icons-sample.md) |
 
-The inventory covers **607 tracked files**: 437 Kotlin, 38 Kotlin scripts, two
+The baseline inventory covers **607 tracked files**: 437 Kotlin, 38 Kotlin scripts, two
 Rust and two Swift files, plus resources/configuration/documentation. Kotlin,
 Kotlin scripts and Rust total **43,653 physical lines**; including Swift gives
 43,708. Three explicitly generated Kotlin sources contribute 9,693 lines.
@@ -32,74 +31,69 @@ are inventory counts, **not passing-test or semantic-review counts**.
 
 ## Product structure
 
-nativeCmpkit is a collection of independently consumable KMP libraries, not a
-single application framework. Most public APIs are Compose functions which
+NativeCmpKit is a collection of independently consumable KMP libraries.
+Most public APIs are Compose functions which
 remember native adapters or mutable observable state. It does not own an
 application-wide service container, navigation lifecycle, filesystem, permission
 policy, or UI thread dispatcher. Host applications supply those environments.
 
 ```mermaid
 flowchart TD
-    APP[Application / sample shells] --> UI[calf-ui]
-    APP --> PICK[calf-file-picker]
-    APP --> CAM[calf-camera-picker]
-    APP --> SHARE[calf-share]
-    APP --> WEB[calf-webview]
-    APP --> PERM[calf-permissions aggregate or feature modules]
-    APP --> NAV[calf-navigation prototype]
-    APP --> ICON[calf-cupertino-icons]
-    APP --> COIL[calf-file-picker-coil]
-    UI --> CORE[calf-core]
-    PICK --> IO[calf-io]
+    APP[Application / sample shells] --> UI[kira-ui]
+    APP --> PICK[kira-file-picker]
+    APP --> CAM[kira-camera-picker]
+    APP --> SHARE[kira-share]
+    APP --> WEB[kira-webview]
+    APP --> PERM[kira-permissions aggregate or feature modules]
+    APP --> NAV[kira-navigation]
+    APP --> GEO[kira-geo]
+    APP --> ICON[kira-cupertino-icons]
+    APP --> COIL[kira-file-picker-coil]
+    UI --> CORE[kira-core]
+    PICK --> IO[kira-io]
     CAM --> IO
     SHARE --> IO
     COIL --> IO
     COIL --> CORE
     IO --> CORE
-    PERM --> PC[calf-permissions-core]
+    PERM --> PC[kira-permissions-core]
     IO --> KIO[kotlinx-io RawSource]
     PICK --> JNI[Desktop JNI / Rust rfd]
     SHARE --> NATIVE[Desktop JNI / Rust AppKit]
     WEB --> FX[Desktop JavaFX]
 ```
 
-Arrow direction means dependency, not callback direction. The complete
-Gradle-declared `api`/`implementation` graph is in the inventory and dependency map.
-Not every module depends on `calf-core`: WebView, permissions, navigation and geo
-primarily consume Compose/OS APIs directly.
+Arrows show dependencies. The [current Maven inventory](../publishing/coordinates.json)
+lists the Kira dependencies for each artifact. WebView, permissions, navigation
+and geo consume Compose and platform APIs directly.
 
 ### Included libraries versus publishable libraries
 
-`settings.gradle.kts:28-60` includes 24 library Gradle projects and five Gradle
-sample projects. Permission projects are renamed at `settings.gradle.kts:63-74`
-to retain artifact names (`:calf-permissions:core` becomes
-`calf-permissions-core`, etc.). The directory paths remain nested.
+`settings.gradle.kts` keeps the permission feature directories nested. The build
+publishes each feature under its own flat artifact ID (for example,
+`kira-permissions-core`).
 
-| Module / family | Role and principal abstraction | Baseline publication plugin |
+| Module / family | Role and principal abstraction | Maven candidate |
 |---|---|---|
-| `calf-core` | `PlatformContext`, composition local, experimental/internal opt-ins | Yes |
-| `calf-io` | `KmpFile`, metadata/read helpers, `RawSource`, context-free overloads | Yes |
-| `calf-file-picker` | File type/selection/settings models, remembered picker/saver, native bridge | Yes |
-| `calf-file-picker-coil` | `KmpFileFetcher.Factory` and Coil-to-Calf context adapter | Yes |
-| `calf-camera-picker` | Remembered capture launcher returning `KmpFile` | Yes |
-| `calf-share` | `ShareContent`, `ShareResult`, remembered launcher | Yes |
-| `calf-webview` | Content/state/navigation/settings/cookie API and embedded platform web engines | Yes |
-| `calf-ui` | Adaptive controls; common state/rules plus Material/UIKit/Compose renderers | Yes |
-| `calf-cupertino-icons` | Font codepoints and Compose icon rendering | Yes |
-| `calf-permissions` | Compatibility umbrella re-exporting all permission subprojects | Yes |
-| `calf-permissions/core` | Permission identity/status/state, registries, storage/SMS/call mappings | Yes |
+| `kira-core` | `PlatformContext`, composition local, experimental/internal opt-ins | Yes |
+| `kira-io` | `KmpFile`, metadata/read helpers, `RawSource`, context-free overloads | Yes |
+| `kira-file-picker` | File type/selection/settings models, remembered picker/saver, native bridge | Yes |
+| `kira-file-picker-coil` | `KmpFileFetcher.Factory` and Coil context adapter | Yes |
+| `kira-camera-picker` | Remembered capture launcher returning `KmpFile` | Yes |
+| `kira-share` | `ShareContent`, `ShareResult`, remembered launcher | Yes |
+| `kira-webview` | Content/state/navigation/settings/cookie API and embedded platform web engines | Yes |
+| `kira-ui` | Adaptive controls with Material/UIKit/Compose renderers | Yes |
+| `kira-cupertino-icons` | Font codepoints and Compose icon rendering | Yes |
+| `kira-permissions` | Optional bundle re-exporting all permission subprojects | Yes |
+| `kira-permissions-core` | Permission identity/status/state, registries, storage/SMS/call mappings | Yes |
 | Ten permission features | Camera, gallery, location, background-location, Bluetooth, contacts, calendar, notifications, Wi-Fi, microphone | Yes, each |
-| `calf-navigation` | In-memory adaptive route stack and a separate expect/actual controller API | **No** |
-| `calf-geo` | Location models plus incomplete tracker implementations | **No** |
-| `calf-maps` | Build file only; no implementation or public API | **No** |
+| `kira-navigation` | Experimental in-memory adaptive route stack and controller API | Yes |
+| `kira-geo` | Experimental location models and limited tracker implementations | Yes |
+| `kira-maps` | Build file only | No |
 
-This makes 21 projects applying `module.publication`. That is not proof of
-successful publication or permission to publish. No nativeCmpkit release or
-package is authorized by this audit. `calf-media` and `calf-notifications` exist
-on disk but are **not included** in settings; the former has only stale build
-configuration, the latter adds an unintegrated iOS experiment. They must not be
-presented as supported features. Notification *permissions* are a different,
-included submodule.
+The 23 Maven candidates include the notification permissions leaf. `kira-media`
+and the unintegrated `kira-notifications` iOS scheduling experiment sit outside
+the active build.
 
 ## Source-set architecture
 
@@ -160,7 +154,7 @@ host restrictions.
    `getPath()` may be a URI, and an iOS original URL may lose access. Opening
    `source()` is the intended stream boundary; browsers still buffer first.
 6. **Native bridges have two compatibility surfaces.** Kotlin package/class names
-   and Rust `Java_com_mohamedrejeb_...` exported symbols must agree. Packaged native
+   and Rust `Java_io_github_apdelrahman1911_kira_...` exports must agree. Packaged native
    resources, when present, are selected by library name and OS/architecture
    directory; no `.so`, `.dll` or `.dylib` is tracked in the audited source tree.
    Changing only Maven group is not the same as changing these ABI names.

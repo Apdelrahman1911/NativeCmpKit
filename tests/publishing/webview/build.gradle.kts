@@ -1,5 +1,6 @@
 import java.security.MessageDigest
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -12,6 +13,8 @@ val groupId = "io.github.apdelrahman1911.nativecmpkit"
 val candidateVersion = providers.gradleProperty("nativecmpkitVersion").get()
 val candidateRepo = file(providers.gradleProperty("nativecmpkitRepository").get())
 val pomOnly = providers.gradleProperty("nativecmpkitMetadataMode").orNull == "pom"
+val metadataMode = if (pomOnly) "pom" else "module"
+layout.buildDirectory.set(layout.projectDirectory.dir("build/$metadataMode"))
 val desktopArtifact = "kira-webview-desktop"
 val jfxVersion = "19"
 val os = System.getProperty("os.name").lowercase()
@@ -42,6 +45,8 @@ dependencies {
 }
 
 tasks.test {
+    if ("linux" in os) environment("SKIKO_RENDER_API", "SOFTWARE")
+    testLogging { exceptionFormat = TestExceptionFormat.FULL }
     doFirst {
         val artifact = configurations.testRuntimeClasspath.get().incoming.artifacts.artifacts
             .filter { (it.id.componentIdentifier as? ModuleComponentIdentifier)?.group == groupId }

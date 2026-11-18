@@ -60,8 +60,7 @@ site
 ### Python ###
 venv/
 
-.calf
-.calf/*
+.kira
 .junie
 .claude
 
@@ -71,9 +70,10 @@ tasks
 CLAUDE.md
 
 kotlin-js-store
+!tests/publishing/webview-browser/kotlin-js-store/
 
-calf-file-picker/src/desktopMain/resources/native
-# nativeCmpkit migration tooling (2026-10-24): keep generated Python caches private to the checkout.
+kira-file-picker/src/desktopMain/resources/native
+# NativeCmpKit migration tooling (2026-10-24): keep generated Python caches private to the checkout.
 __pycache__/
 *.py[cod]
 

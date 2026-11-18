@@ -74,6 +74,7 @@ actual fun WebView(
                 height = "100%"
 
                 addEventListener("load", { _: Event ->
+                    if (state.iframe !== this) return@addEventListener
                     state.loadingState = LoadingState.Finished
                     // Try to read title (only works same-origin)
                     try {
@@ -87,6 +88,7 @@ actual fun WebView(
                 })
 
                 addEventListener("error", { _: Event ->
+                    if (state.iframe !== this) return@addEventListener
                     state.loadingState = LoadingState.Finished
                     state.errorsForCurrentRequest += WebViewError(
                         code = -1,
@@ -101,6 +103,10 @@ actual fun WebView(
         modifier = modifier,
         update = { iframeEl ->
             iframeEl.applySettings(state.settings)
+        },
+        onRelease = { iframeEl ->
+            if (state.iframe === iframeEl) state.iframe = null
+            onDispose()
         },
     )
 }

@@ -193,12 +193,10 @@ internal fun WebView(
 
     AndroidView(
         factory = { context ->
-            (factory?.invoke(context) ?: WebView(context)).apply {
+            val view = (factory?.invoke(context) ?: WebView(context)).apply {
                 onCreated(this)
 
                 applySettings(state.settings)
-
-                this.layoutParams = layoutParams
 
                 state.viewState?.let {
                     this.restoreState(it)
@@ -207,10 +205,25 @@ internal fun WebView(
                 webChromeClient = chromeClient
                 webViewClient = client
             }.also { state.webView = it }
+            FrameLayout(context).apply {
+                this.layoutParams = layoutParams
+                addView(view, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+            }
         },
+        update = { it.layoutParams = layoutParams },
         modifier = modifier,
-        onRelease = {
-            onDispose(it)
+        onRelease = { container ->
+            val view = container.getChildAt(0) as? WebView ?: return@AndroidView
+            try {
+                onDispose(view)
+            } finally {
+                if (state.webView === view) state.webView = null
+                view.webChromeClient = null
+                view.webViewClient = WebViewClient()
+                view.stopLoading()
+                container.removeView(view)
+                view.destroy()
+            }
         }
     )
 }
