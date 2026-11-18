@@ -1,4 +1,3 @@
-import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
@@ -6,16 +5,7 @@ plugins {
     id("module.publication")
 }
 
-val os: OperatingSystem = OperatingSystem.current()
-val arch: String = System.getProperty("os.arch")
-val isAarch64: Boolean = arch.contains("aarch64")
-
-val platform =
-    when {
-        os.isWindows -> "win"
-        os.isMacOsX -> "mac"
-        else -> "linux"
-    } + if (isAarch64) "-aarch64" else ""
+val javaFx = project.javaFxDependencies()
 
 kotlin {
     targets.withType<KotlinNativeTarget>()
@@ -39,13 +29,13 @@ kotlin {
     }
 
     sourceSets.desktopMain.dependencies {
-        implementation("org.openjfx:javafx-base:19:$platform")
-        implementation("org.openjfx:javafx-graphics:19:$platform")
-        implementation("org.openjfx:javafx-controls:19:$platform")
-        implementation("org.openjfx:javafx-media:19:$platform")
-        implementation("org.openjfx:javafx-web:19:$platform")
-        implementation("org.openjfx:javafx-swing:19:$platform")
+        // Applications select JavaFX for the desktop they distribute to.
+        javaFx.forEach { compileOnly(it) }
         implementation(libs.kotlinx.coroutines.swing)
+    }
+
+    sourceSets.desktopTest.dependencies {
+        javaFx.forEach { implementation(it) }
     }
 
     sourceSets.webMain.dependencies {

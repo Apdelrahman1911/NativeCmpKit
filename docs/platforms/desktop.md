@@ -51,8 +51,12 @@ documented action rather than imaginary recipient delivery.
 
 ## JavaFX-specific prerequisites
 
-`calf-webview/build.gradle.kts` explicitly includes six JavaFX artifacts at
-version 19 using a host-derived classifier. Compose/Skiko's successful startup
+`calf-webview` compiles against JavaFX 19. Desktop applications that use
+`nativecmpkit-webview` must supply the JavaFX `base`, `graphics`, `controls`,
+`media`, `web`, and `swing` modules for the target operating system and
+architecture. Use the same version and classifier for all six. The desktop
+sample's `desktop.javafx` convention selects a classifier for the current host.
+Compose/Skiko's successful startup
 does not prove JavaFX native libraries or its rendering pipeline work on the
 same host. Historical #39/#47/#151 describe QuantumRenderer/toolkit failures,
 including Ubuntu 24.04; verify libraries, architecture, display and graphics
