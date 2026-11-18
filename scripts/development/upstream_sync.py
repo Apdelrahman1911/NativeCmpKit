@@ -25,7 +25,7 @@ from archive_upstream import Archive, BASELINE, dump, read, sha256, utc_now  # n
 from sync_github_issues import managed_key, source_links  # noqa: E402
 
 SOURCE = "MohamedRejeb/Calf"
-DESTINATION = "Apdelrahman1911/nativeCmpkit"
+DESTINATION = "Apdelrahman1911/NativeCmpKit"
 SOURCE_ID = 674932206
 ARCHIVE_COMMIT_TOKEN = "__UPSTREAM_SYNC_ARCHIVE_COMMIT__"
 MARKER = re.compile(r"^<!-- nativecmpkit-upstream-sync:674932206:(\d+) -->$")
@@ -116,7 +116,7 @@ def capture(snapshot):
     query = """query{source:repository(owner:\"MohamedRejeb\",name:\"Calf\"){
       id nameWithOwner issues(states:OPEN){totalCount} pullRequests(states:OPEN){totalCount}
       defaultBranchRef{name target{oid}}}
-      destination:repository(owner:\"Apdelrahman1911\",name:\"nativeCmpkit\"){
+      destination:repository(owner:\"Apdelrahman1911\",name:\"NativeCmpKit\"){
       id nameWithOwner issues{totalCount} openIssues:issues(states:OPEN){totalCount}
       pullRequests{totalCount} defaultBranchRef{name target{oid}}}rateLimit{remaining resetAt}}"""
     counts, meta = archive.request("graphql/current-counts.json", "graphql", query=query)

@@ -85,7 +85,11 @@ class SyncSafetyTests(unittest.TestCase):
         self.assertTrue(all(item["original_description_labels_author_and_comments_unchanged"] for item in entries.values()))
         events = [event for item in entries.values() for event in item["added_timeline_entries"]]
         self.assertEqual(len(events), 17)
-        self.assertTrue(all(event["event"] == "cross-referenced" and event["source_url"].startswith(f"https://github.com/{sync.DESTINATION}/issues/") for event in events))
+        issue_prefix = f"https://github.com/{sync.DESTINATION}/issues/".casefold()
+        self.assertTrue(all(
+            event["event"] == "cross-referenced" and event["source_url"].casefold().startswith(issue_prefix)
+            for event in events
+        ))
 
 
 if __name__ == "__main__":

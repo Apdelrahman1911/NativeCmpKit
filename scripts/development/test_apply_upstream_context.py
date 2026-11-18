@@ -35,6 +35,13 @@ class ContextWriterTests(unittest.TestCase):
     def test_no_existing_comment_plans_exactly_one(self):
         self.assertIsNone(module.reconcile(self.operation, self.issue, [], self.body))
 
+    def test_case_only_repository_rename_preserves_reviewed_context(self):
+        legacy = {**self.operation, "repository": "Apdelrahman1911/nativeCmpkit"}
+        issue = {**self.issue, "html_url": self.issue["html_url"].replace("NativeCmpKit", "nativeCmpkit")}
+        body = module.render(legacy, "TOKEN", "a" * 40)
+        self.assertEqual(body, self.body)
+        self.assertIsNone(module.reconcile(legacy, issue, [], body))
+
     def test_identical_existing_comment_is_reused(self):
         comment = {"body": self.body, "id": 7}
         self.assertEqual(comment, module.reconcile(self.operation, self.issue, [comment], self.body))

@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/migration"))
 from github_json import json_pages
 
-REPO = "Apdelrahman1911/nativeCmpkit"
+REPO = "Apdelrahman1911/NativeCmpKit"
 SOURCE = "MohamedRejeb/Calf"
 
 
@@ -51,7 +51,7 @@ def api(endpoint: str, method: str = "GET", data=None, paginate=False):
 
 
 def render(operation: dict, token: str, commit: str) -> str:
-    if operation.get("operation") != "create_issue_comment" or operation.get("repository") != REPO:
+    if operation.get("operation") != "create_issue_comment" or (operation.get("repository") or "").casefold() != REPO.casefold():
         raise ValueError("Unexpected operation/destination")
     if not isinstance(operation.get("issue_number"), int) or operation["issue_number"] <= 0:
         raise ValueError("Invalid destination issue number")
@@ -72,7 +72,7 @@ def render(operation: dict, token: str, commit: str) -> str:
 def reconcile(operation: dict, issue: dict, comments: list, body: str):
     if (issue.get("id") != operation["expected_issue_id"]
             or issue.get("number") != operation["issue_number"]
-            or issue.get("html_url") != f"https://github.com/{REPO}/issues/{operation['issue_number']}"
+            or (issue.get("html_url") or "").casefold() != f"https://github.com/{REPO}/issues/{operation['issue_number']}".casefold()
             or "pull_request" in issue):
         raise ValueError("Destination issue identity differs")
     if sha256(issue.get("body") or "") != operation["expected_issue_body_sha256"]:
@@ -95,7 +95,7 @@ def main():
     parser.add_argument("--apply", action="store_true")
     args = parser.parse_args()
     plan = json.loads(args.handoff.read_text())
-    if plan.get("destination") != REPO or plan.get("source") != SOURCE or plan.get("create_issue_operations"):
+    if (plan.get("destination") or "").casefold() != REPO.casefold() or plan.get("source") != SOURCE or plan.get("create_issue_operations"):
         raise ValueError("This writer accepts reviewed context-only plans for the fixed repositories")
     if not re.fullmatch(r"[0-9a-f]{40}", args.archive_commit):
         raise ValueError("Full archive commit SHA required")
@@ -146,7 +146,7 @@ def main():
                     "comment_url": existing["html_url"] if existing else None, "readback_verified": bool(existing)}
             report["items"].append(item)
             save()
-            print(f"Calf#{item['source_number']} -> nativeCmpkit#{item['issue_number']}: {outcome}", flush=True)
+            print(f"Calf#{item['source_number']} -> NativeCmpKit#{item['issue_number']}: {outcome}", flush=True)
         report["complete"] = True
         report["completed_at_utc"] = dt.datetime.now(dt.timezone.utc).isoformat()
         report["new_issues_created"] = 0

@@ -59,6 +59,8 @@ jobs:
     needs: native-check
     runs-on: macos-26
     timeout-minutes: 100
+    outputs:
+      candidate-artifact: ${{ steps.upload-candidate.outputs.artifact-id }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
@@ -100,6 +102,13 @@ jobs:
             -Dmaven.repo.local="$PWD/build/candidate-maven" publishToMavenLocal
           python3 scripts/publishing/verify_candidate.py --repository build/candidate-maven \
             --prepare-consumers build/clean-consumer
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        id: upload-candidate
+        with:
+          name: maven-candidate
+          path: build/candidate-maven/
+          if-no-files-found: error
+          retention-days: 7
       - name: Compile every component in its own external consumer
         run: |
           ./gradlew -p build/clean-consumer --no-daemon --no-configuration-cache --no-parallel --max-workers=1 \
@@ -108,15 +117,10 @@ jobs:
             -PnativecmpkitRepository="$PWD/build/candidate-maven" \
             compileCommonMainKotlinMetadata compileAndroidMain verifyDesktopResolution \
             compileKotlinIosArm64 compileKotlinIosSimulatorArm64 compileKotlinJs compileKotlinWasmJs
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
-        with:
-          name: maven-candidate
-          path: build/candidate-maven/
-          if-no-files-found: error
-          retention-days: 7
 
   webview-consumer:
     needs: stage-maven
+    if: ${{ always() && needs.stage-maven.outputs.candidate-artifact != '' }}
     strategy:
       fail-fast: false
       matrix:

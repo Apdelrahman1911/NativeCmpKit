@@ -5,8 +5,9 @@ from pathlib import Path, PurePosixPath
 import subprocess
 import sys
 import tarfile
+from tempfile import TemporaryDirectory
 
-from scripts.native.artifacts import MODULE_STEMS, SUPPORTED_PLATFORMS, metadata, toolchain
+from scripts.native.artifacts import MODULE_STEMS, SUPPORTED_PLATFORMS, _replace_directory, metadata, toolchain
 
 
 def shipped_dependency_ids(root, module):
@@ -50,8 +51,7 @@ def supplemental_notices(directory, package, catalog):
     return texts
 
 
-def collect(root, module, cargo_home):
-    output = root / "build/native-notices" / module
+def collect_to(root, module, cargo_home, output):
     report = metadata(root, module, output / "cargo-metadata.json")
     selected = shipped_dependency_ids(root, module)
     supplement_root = (root / "licenses/native-cargo").resolve()
@@ -108,6 +108,16 @@ def collect(root, module, cargo_home):
                                     if package["source_kind"] == "crates.io" and package["id"] not in selected),
     }
     (output / "notice-collection.json").write_text(json.dumps(result, indent=2) + "\n")
+    return result
+
+
+def collect(root, module, cargo_home):
+    destination = root / "build/native-notices" / module
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with TemporaryDirectory(dir=destination.parent, prefix=".notices-") as temporary:
+        output = Path(temporary) / module
+        result = collect_to(root, module, cargo_home, output)
+        _replace_directory(output, destination)
     return result
 
 

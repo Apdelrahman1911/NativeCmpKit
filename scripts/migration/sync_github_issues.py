@@ -21,7 +21,7 @@ from urllib.parse import quote
 from github_json import json_pages
 
 ROOT=Path(__file__).resolve().parents[2]
-REPO='Apdelrahman1911/nativeCmpkit'
+REPO='Apdelrahman1911/NativeCmpKit'
 BASE='af388bd3ad0325b2afdd8c0149cb7ff6f24c5da6'
 PREFIX='<!-- nativecmpkit-item:'
 COLORS={'Critical':'b60205','High':'d93f0b','Medium':'fbca04','Low':'0e8a16'}
@@ -242,7 +242,7 @@ def main():
             existing[key]=issue
     map_path=ROOT/'docs/migration/issue-map.json'
     prior=json.loads(map_path.read_text()) if map_path.exists() else {'repository':REPO,'items':[]}
-    if prior['repository']!=REPO: raise RuntimeError('Prior issue map belongs to a different repository')
+    if prior['repository'].casefold()!=REPO.casefold(): raise RuntimeError('Prior issue map belongs to a different repository')
     prior_entries={entry['key']:entry for entry in prior['items']}
     saved=dict(prior_entries)
     mapping={'schema_version':1,'repository':REPO,'baseline':BASE,'synced_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),'complete':False,'items':[]}

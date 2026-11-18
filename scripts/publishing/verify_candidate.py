@@ -133,7 +133,8 @@ import {symbol}
 fun consumerPermission(): Permission = Permission.{member}
 """
         else:
-            code = f"typealias PublishedApi = {symbol}\n"
+            annotation = f"@file:OptIn({module['consumerOptIn']}::class)\n\n" if "consumerOptIn" in module else ""
+            code = f"{annotation}typealias PublishedApi = {symbol}\n"
         source.write_text(code)
 
 
