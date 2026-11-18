@@ -12,7 +12,7 @@ project="$PWD/tests/publishing/webview-ios"
 app="$project/build/KiraWebViewConsumer.app"
 frameworks="$project/build/bin/iosSimulatorArm64/debugFramework"
 mkdir -p "$app"
-xcrun --sdk iphonesimulator swiftc -parse-as-library -target arm64-apple-ios18.5-simulator \
+xcrun --sdk iphonesimulator swiftc -parse-as-library -module-name KiraWebViewHost -target arm64-apple-ios18.5-simulator \
     -sdk "$(xcrun --sdk iphonesimulator --show-sdk-path)" -F "$frameworks" -framework KiraWebViewConsumer \
     -framework WebKit "$project/Runner.swift" -o "$app/KiraWebViewConsumer"
 cp "$project/Info.plist" "$app/Info.plist"

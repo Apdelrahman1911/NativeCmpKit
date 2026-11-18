@@ -162,6 +162,7 @@ jobs:
 
   webview-consumer:
     needs: consumer-artifact
+    if: ${{ !cancelled() && needs.consumer-artifact.result == 'success' && needs.consumer-artifact.outputs.run != '' }}
     strategy:
       fail-fast: false
       matrix:
@@ -227,6 +228,7 @@ jobs:
 
   webview-browser:
     needs: consumer-artifact
+    if: ${{ !cancelled() && needs.consumer-artifact.result == 'success' && needs.consumer-artifact.outputs.run != '' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
@@ -257,6 +259,7 @@ jobs:
 
   webview-android:
     needs: consumer-artifact
+    if: ${{ !cancelled() && needs.consumer-artifact.result == 'success' && needs.consumer-artifact.outputs.run != '' }}
     strategy:
       fail-fast: false
       matrix:
@@ -292,6 +295,7 @@ jobs:
 
   webview-ios:
     needs: consumer-artifact
+    if: ${{ !cancelled() && needs.consumer-artifact.result == 'success' && needs.consumer-artifact.outputs.run != '' }}
     runs-on: macos-26
     timeout-minutes: 45
     steps:
