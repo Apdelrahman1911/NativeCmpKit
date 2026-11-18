@@ -1,9 +1,9 @@
-<!-- Modified for nativeCmpkit migration (2026-10-24): independent coordinates / project references; inherited APIs retained. -->
+<!-- Modified for NativeCmpKit migration (2026-10-24): independent coordinates / project references; inherited APIs retained. -->
 # Content Sharing
 
-> **nativeCmpkit migration:** new coordinates are **unpublished**. See [installation](installation.md) and the [source audit](audit/README.md). Historical Calf version claims are preserved, not certified as nativeCmpkit releases.
+> **NativeCmpKit migration:** new coordinates are **unpublished**. See [installation](installation.md) and the [source audit](audit/README.md). Historical Kira version claims are preserved, not certified as NativeCmpKit releases.
 
-`calf-share` provides cross-platform content sharing using the platform's native share mechanism.
+`kira-share` provides cross-platform content sharing using the platform's native share mechanism.
 
 ## Installation
 
@@ -11,14 +11,14 @@
 ```kotlin
 // build.gradle.kts
 commonMain.dependencies {
-    implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-share:<version>")
+    implementation("io.github.apdelrahman1911.nativecmpkit:kira-share:<version>")
 }
 ```
 
 ## Quick Start
 
 ```kotlin
-@OptIn(ExperimentalCalfApi::class)
+@OptIn(ExperimentalKiraApi::class)
 @Composable
 fun ShareButton() {
     val shareLauncher = rememberShareLauncher { result ->
@@ -30,7 +30,7 @@ fun ShareButton() {
     }
 
     Button(onClick = {
-        shareLauncher.launch(ShareContent.Text(text = "Hello from Calf!"))
+        shareLauncher.launch(ShareContent.Text(text = "Hello from Kira!"))
     }) {
         Text("Share")
     }
@@ -47,7 +47,7 @@ Share plain text with an optional email subject:
 shareLauncher.launch(
     ShareContent.Text(
         text = "Check out this library!",
-        subject = "Calf Library",
+        subject = "Kira Library",
     )
 )
 ```
@@ -59,7 +59,7 @@ Share a URL. On iOS, this may show a rich link preview:
 ```kotlin
 shareLauncher.launch(
     ShareContent.Url(
-        url = "https://github.com/Apdelrahman1911/nativeCmpkit",
+        url = "https://github.com/Apdelrahman1911/NativeCmpKit",
     )
 )
 ```

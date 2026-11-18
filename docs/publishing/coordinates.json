@@ -1,0 +1,233 @@
+{
+  "name": "NativeCmpKit",
+  "repository": "Apdelrahman1911/NativeCmpKit",
+  "maintainer": "Abdelrahman Fahmy",
+  "group": "io.github.apdelrahman1911.nativecmpkit",
+  "candidateVersion": "0.1.0-preview.1",
+  "platformArtifacts": [
+    "android",
+    "desktop",
+    "iosarm64",
+    "iossimulatorarm64",
+    "js",
+    "wasm-js"
+  ],
+  "modules": [
+    {
+      "artifact": "kira-camera-picker",
+      "project": ":kira-camera-picker",
+      "directory": "kira-camera-picker",
+      "dependencies": [
+        "kira-io"
+      ],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.camerapicker.CameraPickerLauncher"
+    },
+    {
+      "artifact": "kira-core",
+      "project": ":kira-core",
+      "directory": "kira-core",
+      "dependencies": [],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.core.PlatformContext"
+    },
+    {
+      "artifact": "kira-cupertino-icons",
+      "project": ":kira-cupertino-icons",
+      "directory": "kira-cupertino-icons",
+      "dependencies": [],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.cupertino.icons.CupertinoIcons"
+    },
+    {
+      "artifact": "kira-file-picker",
+      "project": ":kira-file-picker",
+      "directory": "kira-file-picker",
+      "dependencies": [
+        "kira-io"
+      ],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.picker.FilePickerLauncher"
+    },
+    {
+      "artifact": "kira-file-picker-coil",
+      "project": ":kira-file-picker-coil",
+      "directory": "kira-file-picker-coil",
+      "dependencies": [
+        "kira-core",
+        "kira-io"
+      ],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.picker.coil.KmpFileFetcher"
+    },
+    {
+      "artifact": "kira-geo",
+      "project": ":kira-geo",
+      "directory": "kira-geo",
+      "dependencies": [],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.geo.LocationTracker"
+    },
+    {
+      "artifact": "kira-io",
+      "project": ":kira-io",
+      "directory": "kira-io",
+      "dependencies": [
+        "kira-core"
+      ],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.io.KmpFile"
+    },
+    {
+      "artifact": "kira-navigation",
+      "project": ":kira-navigation",
+      "directory": "kira-navigation",
+      "dependencies": [],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.navigation.AdaptiveNavHostController"
+    },
+    {
+      "artifact": "kira-permissions",
+      "project": ":kira-permissions",
+      "directory": "kira-permissions",
+      "dependencies": [
+        "kira-permissions-core",
+        "kira-permissions-background-location",
+        "kira-permissions-bluetooth",
+        "kira-permissions-calendar",
+        "kira-permissions-camera",
+        "kira-permissions-contacts",
+        "kira-permissions-gallery",
+        "kira-permissions-location",
+        "kira-permissions-microphone",
+        "kira-permissions-notifications",
+        "kira-permissions-wifi"
+      ],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.permissions.Permission"
+    },
+    {
+      "artifact": "kira-permissions-background-location",
+      "project": ":kira-permissions:kira-permissions-background-location",
+      "directory": "kira-permissions/background-location",
+      "dependencies": [
+        "kira-permissions-core"
+      ],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.permissions.BackgroundLocation",
+      "consumerPermissionExtension": true
+    },
+    {
+      "artifact": "kira-permissions-bluetooth",
+      "project": ":kira-permissions:kira-permissions-bluetooth",
+      "directory": "kira-permissions/bluetooth",
+      "dependencies": [
+        "kira-permissions-core"
+      ],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.permissions.BluetoothLe",
+      "consumerPermissionExtension": true
+    },
+    {
+      "artifact": "kira-permissions-calendar",
+      "project": ":kira-permissions:kira-permissions-calendar",
+      "directory": "kira-permissions/calendar",
+      "dependencies": [
+        "kira-permissions-core"
+      ],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.permissions.ReadCalendar",
+      "consumerPermissionExtension": true
+    },
+    {
+      "artifact": "kira-permissions-camera",
+      "project": ":kira-permissions:kira-permissions-camera",
+      "directory": "kira-permissions/camera",
+      "dependencies": [
+        "kira-permissions-core"
+      ],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.permissions.Camera",
+      "consumerPermissionExtension": true
+    },
+    {
+      "artifact": "kira-permissions-contacts",
+      "project": ":kira-permissions:kira-permissions-contacts",
+      "directory": "kira-permissions/contacts",
+      "dependencies": [
+        "kira-permissions-core"
+      ],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.permissions.ReadContacts",
+      "consumerPermissionExtension": true
+    },
+    {
+      "artifact": "kira-permissions-core",
+      "project": ":kira-permissions:kira-permissions-core",
+      "directory": "kira-permissions/core",
+      "dependencies": [],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.permissions.Permission"
+    },
+    {
+      "artifact": "kira-permissions-gallery",
+      "project": ":kira-permissions:kira-permissions-gallery",
+      "directory": "kira-permissions/gallery",
+      "dependencies": [
+        "kira-permissions-core"
+      ],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.permissions.Gallery",
+      "consumerPermissionExtension": true
+    },
+    {
+      "artifact": "kira-permissions-location",
+      "project": ":kira-permissions:kira-permissions-location",
+      "directory": "kira-permissions/location",
+      "dependencies": [
+        "kira-permissions-core"
+      ],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.permissions.FineLocation",
+      "consumerPermissionExtension": true
+    },
+    {
+      "artifact": "kira-permissions-microphone",
+      "project": ":kira-permissions:kira-permissions-microphone",
+      "directory": "kira-permissions/microphone",
+      "dependencies": [
+        "kira-permissions-core"
+      ],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.permissions.RecordAudio",
+      "consumerPermissionExtension": true
+    },
+    {
+      "artifact": "kira-permissions-notifications",
+      "project": ":kira-permissions:kira-permissions-notifications",
+      "directory": "kira-permissions/notifications",
+      "dependencies": [
+        "kira-permissions-core"
+      ],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.permissions.Notification",
+      "consumerPermissionExtension": true
+    },
+    {
+      "artifact": "kira-permissions-wifi",
+      "project": ":kira-permissions:kira-permissions-wifi",
+      "directory": "kira-permissions/wifi",
+      "dependencies": [
+        "kira-permissions-core"
+      ],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.permissions.WifiAccessState",
+      "consumerPermissionExtension": true
+    },
+    {
+      "artifact": "kira-share",
+      "project": ":kira-share",
+      "directory": "kira-share",
+      "dependencies": [
+        "kira-io"
+      ],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.share.ShareLauncher"
+    },
+    {
+      "artifact": "kira-ui",
+      "project": ":kira-ui",
+      "directory": "kira-ui",
+      "dependencies": [
+        "kira-core"
+      ],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.ui.navigation.UIKitNavigationBarConfiguration"
+    },
+    {
+      "artifact": "kira-webview",
+      "project": ":kira-webview",
+      "directory": "kira-webview",
+      "dependencies": [],
+      "consumerSymbol": "io.github.apdelrahman1911.kira.ui.web.WebViewState"
+    }
+  ]
+}

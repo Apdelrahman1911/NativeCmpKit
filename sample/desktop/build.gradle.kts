@@ -1,4 +1,4 @@
-// Modified for nativeCmpkit migration (2026-10-24): sample identity only.
+// Modified for NativeCmpKit migration (2026-10-24): sample identity only.
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -18,8 +18,8 @@ kotlin {
 
     sourceSets.jvmMain.dependencies {
         implementation(projects.sample.common)
-        implementation(projects.calfFilePicker)
-        implementation(projects.calfShare)
+        implementation(projects.kiraFilePicker)
+        implementation(projects.kiraShare)
         implementation(compose.desktop.currentOs)
     }
 }
@@ -29,7 +29,7 @@ compose.desktop {
         mainClass = "MainKt"
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "nativeCmpkit"
+            packageName = "NativeCmpKit"
             packageVersion = "1.0.0"
 
             macOS {

@@ -106,6 +106,7 @@ def main() -> int:
 
     try:
         identity = json.loads((ROOT / "docs/migration/identity.json").read_text())
+        current = json.loads((ROOT / "docs/publishing/coordinates.json").read_text())
         report["observed_checkout_sha"] = command("git", "rev-parse", "HEAD").strip()
         report["worktree_porcelain"] = command("git", "status", "--porcelain").splitlines()
         baseline = identity["source_baseline"]
@@ -118,14 +119,14 @@ def main() -> int:
               "LICENSE is byte-identical to the upstream baseline")
         for name in ("NOTICE", "THIRD_PARTY_NOTICES.md", "AGENTS.md"):
             check("required_notice_" + name, (ROOT / name).is_file(), name)
-        check("root_identity", 'rootProject.name = "nativeCmpkit"' in (ROOT / "settings.gradle.kts").read_text(), "Root Gradle project name")
-        check("maven_identity", 'group = "io.github.apdelrahman1911.nativecmpkit"' in (ROOT / "build.gradle.kts").read_text(), "Prospective independent Maven group (not publication validation)")
-        check("resource_namespace_pinned", 'packageOfResClass = "com.mohamedrejeb.calf.calf_cupertino_icons.generated.resources"' in (ROOT / "calf-cupertino-icons/build.gradle.kts").read_text(), "Retain Compose resource imports across Maven group rename")
+        check("root_identity", f'rootProject.name = "{current["name"]}"' in (ROOT / "settings.gradle.kts").read_text(), "Root Gradle project name")
+        check("maven_identity", f'group = "{current["group"]}"' in (ROOT / "build.gradle.kts").read_text(), "NativeCmpKit Maven group")
+        check("resource_namespace", 'packageOfResClass = "io.github.apdelrahman1911.kira.kira_cupertino_icons.generated.resources"' in (ROOT / "kira-cupertino-icons/build.gradle.kts").read_text(), "Kira Compose resource namespace")
         check("no_git_alternates", not (ROOT / ".git/objects/info/alternates").exists(), "Local checkout does not require another clone's object store")
-        check("coordinate_uniqueness", len({m['new_artifact'] for m in identity['modules']}) == len(identity['modules']), f"{len(identity['modules'])} planned artifacts; no publication implied")
-        for module in identity["modules"]:
-            source = safe_child(ROOT, module["source_directory"]) / "build.gradle.kts"
-            check("publishable_module_" + module["new_artifact"], 'id("module.publication")' in source.read_text(), module["source_directory"])
+        check("coordinate_uniqueness", len({m['artifact'] for m in current['modules']}) == len(current['modules']), f"{len(current['modules'])} planned artifacts")
+        for module in current["modules"]:
+            source = safe_child(ROOT, module["directory"]) / "build.gradle.kts"
+            check("publishable_module_" + module["artifact"], 'id("module.publication")' in source.read_text(), module["directory"])
 
         archive = ROOT / "docs/migration/git"
         expected = {}
@@ -218,13 +219,13 @@ def main() -> int:
             check("offline_bundle_restore_integrity", True, {"commits": int(command("git", "--git-dir=" + temp, "rev-list", "--all", "--count")), "network_required": False})
 
         if args.remote:
-            repo = identity["github_repository"]
-            if repo != "Apdelrahman1911/nativeCmpkit":
+            repo = current["repository"]
+            if repo != "Apdelrahman1911/NativeCmpKit" or repo.casefold() != identity["github_repository"].casefold():
                 raise ValueError("Unexpected destination repository")
             state = json.loads(command("gh", "api", "repos/" + repo))
             check("independent_github_repository", state.get("fork") is False and state["full_name"] == repo, {"full_name": state["full_name"], "fork": state.get("fork"), "default_branch": state["default_branch"]})
             incident = json.loads((ROOT / "docs/migration/pages-incident.json").read_text())
-            check("legacy_pages_incident_disclosed", incident["repository"] == repo and incident["schema_version"] == 1,
+            check("legacy_pages_incident_disclosed", incident["repository"].casefold() == repo.casefold() and incident["schema_version"] == 1,
                   "One unintended historical-branch deployment is recorded; not a zero-deployment claim")
             report["pages_configuration_present"] = state.get("has_pages")
             if state.get("has_pages"):

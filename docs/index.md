@@ -1,27 +1,13 @@
-# nativeCmpkit
+# NativeCmpKit
 
-Independent Kotlin Multiplatform native components, derived from Apache-2.0 Calf.
+NativeCmpKit is a Kotlin Multiplatform toolkit maintained by Abdelrahman Fahmy.
+Its independently consumable Kira modules cover Android, desktop JVM, iOS,
+browser JavaScript and Wasm, with module-specific platform support.
 
-**Migration/audit state, not a production certification. No nativeCmpkit packages
-or releases have been published.** Original Git history and GitHub metadata are
-retained locally in this repository. No new demo/documentation site was intentionally
-deployed. GitHub recorded an [unintended legacy Pages deployment](migration/pages-incident.md)
-from the preserved historical branch; legacy publishing is disabled, but existing
-deployment unpublishing remains the documented owner follow-up.
+- [Installation, artifact list and migration](installation.md)
+- [Platform support and feature limits](platforms/README.md)
+- [Testing and verification results](testing/README.md)
+- [Original history and archival records](migration/README.md)
+- [License and credits](https://github.com/Apdelrahman1911/NativeCmpKit#license-and-credits)
 
-## Read first
-
-- [Installation and compatibility](installation.md)
-- [Architecture](architecture/README.md) and [module guides](modules/README.md)
-- [Platform support, stubs and limitations](platforms/README.md)
-- [Technical audit](audit/README.md) and [final report](audit/final-report.md)
-- [Testing results](testing/README.md)
-- [Development roadmap](roadmap/README.md) and [decisions](decisions/README.md)
-- [Migration and preserved metadata](migration/README.md)
-
-Existing Kotlin imports use `com.mohamedrejeb.calf.*` deliberately; prospective
-Maven coordinates use `io.github.apdelrahman1911.nativecmpkit:nativecmpkit-*`.
-
-Copyright 2023 Mohamed Rejeb; migration additions copyright 2026 nativeCmpkit
-contributors. See the repository's Apache-2.0 LICENSE, NOTICE and third-party
-notices. [Unmodified upstream overview](migration/legacy/index.upstream.md).
+The first Maven Central release is in verification.

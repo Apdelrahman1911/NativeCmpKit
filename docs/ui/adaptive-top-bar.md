@@ -1,7 +1,7 @@
-<!-- Modified for nativeCmpkit migration (2026-10-24): independent coordinates / project references; inherited APIs retained. -->
+<!-- Modified for NativeCmpKit migration (2026-10-24): independent coordinates / project references; inherited APIs retained. -->
 # Top Bar
 
-> **nativeCmpkit migration:** this inherited API guide is being maintained in the independent repository. New coordinates are **unpublished**; see [installation](../installation.md) and the source audit. Platform behavior and historical version claims are not all verified.
+> **NativeCmpKit migration:** this inherited API guide is being maintained in the independent repository. New coordinates are **unpublished**; see [installation](../installation.md) and the source audit. Platform behavior and historical version claims are not all verified.
 
 `AdaptiveTopBar` is an adaptive top app bar that uses UIKit's `UINavigationBar` on iOS and Material3's `TopAppBar` on other platforms (Android, Desktop, Web).
 
@@ -14,7 +14,7 @@ On iOS, a native UINavigationBar is created using the `iosTitle`, `iosLeadingIte
 ## Usage
 
 ```kotlin
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalCalfUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalKiraUiApi::class)
 @Composable
 fun MyScreen() {
     AdaptiveTopBar(
@@ -111,7 +111,7 @@ UIKitUIBarButtonItem.fixedSpace(width = 16.0)
 ```
 
 !!! tip
-    Use type-safe `SFSymbol` constants from `calf-ui` instead of raw strings for icon names. See [SF Symbols & Cupertino Icons](../sf-symbols.md) for details.
+    Use type-safe `SFSymbol` constants from `kira-ui` instead of raw strings for icon names. See [SF Symbols & Cupertino Icons](../sf-symbols.md) for details.
 
 ### Bar Button Item with Menu
 
@@ -125,7 +125,7 @@ On Material platforms, use a standard `DropdownMenu` inside the `actions` slot.
 | ![AdaptiveTopBarDropdown Material](../images/gif/AdaptiveTopBarDropdown-material.gif) | ![AdaptiveTopBarDropdown iOS](../images/gif/AdaptiveTopBarDropdown-ios.gif) | ![AdaptiveTopBarDropdown Liquid Glass](../images/gif/AdaptiveTopBarDropdown-ios-liquid-glass.gif) |
 
 ```kotlin
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalCalfUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalKiraUiApi::class)
 @Composable
 fun MyScreen() {
     var expanded by remember { mutableStateOf(false) }

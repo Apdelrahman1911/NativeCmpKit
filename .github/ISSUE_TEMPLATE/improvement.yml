@@ -1,6 +1,6 @@
-# Modified for nativeCmpkit migration (2026-10-24); source module paths retained.
+# Modified for NativeCmpKit migration (2026-10-24); source module paths retained.
 name: Improvement
-description: Suggest improvements to existing nativeCmpkit functionality
+description: Suggest improvements to existing NativeCmpKit functionality
 title: "[Improvement]: "
 labels: ["improvement"]
 body:
@@ -24,18 +24,18 @@ body:
     id: module
     attributes:
       label: Module
-      description: Which nativeCmpkit source module does this improvement relate to? Existing calf-* paths are retained.
+      description: Which Kira module should change?
       options:
-        - calf-ui
-        - calf-file-picker
-        - calf-file-picker-coil
-        - calf-io
-        - calf-camera-picker
-        - calf-share
-        - calf-webview
-        - calf-permissions
-        - calf-cupertino-icons
-        - calf-core
+        - kira-ui
+        - kira-file-picker
+        - kira-file-picker-coil
+        - kira-io
+        - kira-camera-picker
+        - kira-share
+        - kira-webview
+        - kira-permissions
+        - kira-cupertino-icons
+        - kira-core
         - other
     validations:
       required: true
@@ -45,7 +45,7 @@ body:
     attributes:
       label: Specify Other Module (if you selected "other" above)
       description: Only fill this if you chose "other" in the Module dropdown.
-      placeholder: e.g., calf-geo, calf-navigation
+      placeholder: e.g., kira-geo, kira-navigation
 
   - type: dropdown
     id: area

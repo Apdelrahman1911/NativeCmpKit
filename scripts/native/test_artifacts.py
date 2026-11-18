@@ -19,7 +19,7 @@ class NativeArtifactsTest(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.root = Path(self.tmp.name)
-        self.module = "calf-file-picker"
+        self.module = "kira-file-picker"
         self.resources = self.root / "build/input"
         self.platform = "linux-x64"
         self.revision = "a" * 40
@@ -111,7 +111,7 @@ class NativeArtifactsTest(unittest.TestCase):
 
     def test_foreign_module_binaries_are_rejected(self):
         self.bundle()
-        self.bundle(module="calf-share")
+        self.bundle(module="kira-share")
         with self.assertRaisesRegex(ValueError, "unexpected"):
             self.validate()
 
@@ -174,7 +174,7 @@ class NativeArtifactsTest(unittest.TestCase):
             self.validate()
 
     def test_bad_identity_version_toolchain_and_abi_rejected(self):
-        replacements = {"abiVersion": 2, "module": "calf-share", "platform": "linux-arm64",
+        replacements = {"abiVersion": 2, "module": "kira-share", "platform": "linux-arm64",
                         "schemaVersion": 2, "filename": "unrelated.so", "rustToolchain": "stable",
                         "crateVersion": "4.0.0", "libraryVersion": "2.0.0", "cargoProfile": "debug",
                         "rustTarget": "aarch64-unknown-linux-gnu", "rustFlags": ["-C"]}
@@ -281,7 +281,7 @@ class NativeArtifactsTest(unittest.TestCase):
 
     def test_duplicate_json_keys_rejected(self):
         path, _, _ = self.bundle()
-        path.write_text('{"module":"calf-share","module":"calf-file-picker"}')
+        path.write_text('{"module":"kira-share","module":"kira-file-picker"}')
         with self.assertRaisesRegex(ValueError, "Duplicate"):
             self.validate()
 
@@ -364,7 +364,7 @@ class NativeArtifactsTest(unittest.TestCase):
 
     def test_assembly_cannot_destroy_source_or_unrelated_directory(self):
         self.bundle()
-        for destination in (self.root, self.root / "calf-io", self.root / "build", self.root / self.module):
+        for destination in (self.root, self.root / "kira-io", self.root / "build", self.root / self.module):
             with self.assertRaisesRegex(ValueError, "dedicated child"):
                 a.assemble(self.root, self.module, self.resources, destination, [self.platform], expected_revision=self.revision)
 
@@ -405,7 +405,7 @@ class NativeArtifactsTest(unittest.TestCase):
     def test_symlink_directory_input_is_rejected(self):
         directory = self.root / self.module / "native/alias"
         try:
-            directory.symlink_to(self.root / "calf-share/native", target_is_directory=True)
+            directory.symlink_to(self.root / "kira-share/native", target_is_directory=True)
         except OSError:
             self.skipTest("Host account cannot create symlinks")
         with self.assertRaisesRegex(ValueError, "Symlink input directory"):
@@ -497,7 +497,7 @@ class NativeArtifactsTest(unittest.TestCase):
                         "commit", "--quiet", "-m", "Synthetic native inputs"], cwd=self.root, check=True)
         revision, dirty = a.git_provenance(self.root, self.module)
         self.assertFalse(dirty)
-        self.write(".git/info/exclude", "/calf-file-picker/native/src/ignored.rs\n")
+        self.write(".git/info/exclude", "/kira-file-picker/native/src/ignored.rs\n")
         self.write(f"{self.module}/native/src/ignored.rs", "pub fn ignored() {}\n")
         status = subprocess.check_output(["git", "status", "--porcelain", "--untracked-files=normal", "--",
                                           *a.native_provenance_paths(self.root, self.module)], cwd=self.root)

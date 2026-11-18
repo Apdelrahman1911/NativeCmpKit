@@ -1,5 +1,4 @@
-// Modified for nativeCmpkit migration (2026-10-24); legacy project paths preserve source compatibility.
-rootProject.name = "nativeCmpkit"
+rootProject.name = "NativeCmpKit"
 
 pluginManagement {
     includeBuild("convention-plugins")
@@ -28,30 +27,30 @@ plugins {
 
 include(
     // Artifact modules
-    ":calf-core",
-    ":calf-ui",
-    ":calf-webview",
-    ":calf-cupertino-icons",
-    ":calf-navigation",
-    ":calf-io",
-    ":calf-file-picker",
-    ":calf-file-picker-coil",
-    ":calf-permissions",
-    ":calf-permissions:core",
-    ":calf-permissions:camera",
-    ":calf-permissions:gallery",
-    ":calf-permissions:location",
-    ":calf-permissions:background-location",
-    ":calf-permissions:bluetooth",
-    ":calf-permissions:contacts",
-    ":calf-permissions:calendar",
-    ":calf-permissions:notifications",
-    ":calf-permissions:wifi",
-    ":calf-permissions:microphone",
-    ":calf-geo",
-    ":calf-maps",
-    ":calf-camera-picker",
-    ":calf-share",
+    ":kira-core",
+    ":kira-ui",
+    ":kira-webview",
+    ":kira-cupertino-icons",
+    ":kira-navigation",
+    ":kira-io",
+    ":kira-file-picker",
+    ":kira-file-picker-coil",
+    ":kira-permissions",
+    ":kira-permissions:core",
+    ":kira-permissions:camera",
+    ":kira-permissions:gallery",
+    ":kira-permissions:location",
+    ":kira-permissions:background-location",
+    ":kira-permissions:bluetooth",
+    ":kira-permissions:contacts",
+    ":kira-permissions:calendar",
+    ":kira-permissions:notifications",
+    ":kira-permissions:wifi",
+    ":kira-permissions:microphone",
+    ":kira-geo",
+    ":kira-maps",
+    ":kira-camera-picker",
+    ":kira-share",
     // Sample modules
     ":sample:android",
     ":sample:desktop",
@@ -60,18 +59,18 @@ include(
     ":sample:common",
 )
 
-// Rename projects to keep published artifact names unchanged
-project(":calf-permissions:core").name = "calf-permissions-core"
-project(":calf-permissions:camera").name = "calf-permissions-camera"
-project(":calf-permissions:gallery").name = "calf-permissions-gallery"
-project(":calf-permissions:location").name = "calf-permissions-location"
-project(":calf-permissions:background-location").name = "calf-permissions-background-location"
-project(":calf-permissions:bluetooth").name = "calf-permissions-bluetooth"
-project(":calf-permissions:contacts").name = "calf-permissions-contacts"
-project(":calf-permissions:calendar").name = "calf-permissions-calendar"
-project(":calf-permissions:notifications").name = "calf-permissions-notifications"
-project(":calf-permissions:wifi").name = "calf-permissions-wifi"
-project(":calf-permissions:microphone").name = "calf-permissions-microphone"
+// Give each permission leaf a unique Maven artifact ID.
+project(":kira-permissions:core").name = "kira-permissions-core"
+project(":kira-permissions:camera").name = "kira-permissions-camera"
+project(":kira-permissions:gallery").name = "kira-permissions-gallery"
+project(":kira-permissions:location").name = "kira-permissions-location"
+project(":kira-permissions:background-location").name = "kira-permissions-background-location"
+project(":kira-permissions:bluetooth").name = "kira-permissions-bluetooth"
+project(":kira-permissions:contacts").name = "kira-permissions-contacts"
+project(":kira-permissions:calendar").name = "kira-permissions-calendar"
+project(":kira-permissions:notifications").name = "kira-permissions-notifications"
+project(":kira-permissions:wifi").name = "kira-permissions-wifi"
+project(":kira-permissions:microphone").name = "kira-permissions-microphone"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 enableFeaturePreview("STABLE_CONFIGURATION_CACHE")

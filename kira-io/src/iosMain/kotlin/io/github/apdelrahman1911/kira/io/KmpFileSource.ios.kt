@@ -1,0 +1,12 @@
+package io.github.apdelrahman1911.kira.io
+
+import io.github.apdelrahman1911.kira.core.PlatformContext
+import kotlinx.io.RawSource
+import kotlinx.io.files.FileNotFoundException
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
+
+actual suspend fun KmpFile.source(context: PlatformContext): RawSource {
+    val path = url.path ?: throw FileNotFoundException("No file system path for $url")
+    return SystemFileSystem.source(Path(path))
+}

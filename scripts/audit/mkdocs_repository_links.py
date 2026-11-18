@@ -10,7 +10,7 @@ from urllib.parse import quote, unquote, urlsplit, urlunsplit
 
 ROOT = Path(__file__).resolve().parents[2]
 DOCS = ROOT / "docs"
-REPO = "https://github.com/Apdelrahman1911/nativeCmpkit"
+REPO = "https://github.com/Apdelrahman1911/NativeCmpKit"
 EXCLUDED_PREFIXES = ("migration/upstream-metadata/", "migration/git/", "migration/legacy/", "testing/evidence/", "testing/native-features-probes/", "audit/issue-drafts/", "audit/findings/")
 EXCLUDED_FILES = {"audit/source-inventory.json"}
 
@@ -30,7 +30,7 @@ def repository_link(url, page_path, root=ROOT):
         if not excluded and not target.is_dir():
             return url
     path = target.relative_to(root.resolve()).as_posix()
-    return urlunsplit(("https", "github.com", "/Apdelrahman1911/nativeCmpkit/" + ("tree" if target.is_dir() else "blob") + "/main/" + quote(path, safe="/"), parts.query, parts.fragment))
+    return urlunsplit(("https", "github.com", "/Apdelrahman1911/NativeCmpKit/" + ("tree" if target.is_dir() else "blob") + "/main/" + quote(path, safe="/"), parts.query, parts.fragment))
 
 
 def on_page_markdown(markdown, page, config, files):

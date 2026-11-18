@@ -1,6 +1,6 @@
-# Modified for nativeCmpkit migration (2026-10-24).
+# Modified for NativeCmpKit migration (2026-10-24).
 # Read-only verification; the original auto-publishing workflow is archived under docs/migration/legacy/.
-name: nativeCmpkit verification
+name: NativeCmpKit verification
 
 on:
   push:
@@ -82,7 +82,7 @@ jobs:
           '-Dorg.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8'
           -Pkotlin.compiler.execution.strategy=in-process
           -Pkotlin.native.jvmArgs=-Xmx2048m
-          :calf-ui:jsBrowserTest :calf-ui:wasmJsBrowserTest
+          :kira-ui:jsBrowserTest :kira-ui:wasmJsBrowserTest
           --no-configuration-cache
       - name: Browser sample production builds
         if: always() && runner.os == 'Linux'

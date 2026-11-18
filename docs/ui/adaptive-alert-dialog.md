@@ -1,9 +1,9 @@
-<!-- Modified for nativeCmpkit migration (2026-10-24): independent coordinates / project references; inherited APIs retained. -->
+<!-- Modified for NativeCmpKit migration (2026-10-24): independent coordinates / project references; inherited APIs retained. -->
 # Alert Dialog
 
-> **nativeCmpkit migration:** this inherited API guide is being maintained in the independent repository. New coordinates are **unpublished**; see [installation](../installation.md) and the source audit. Platform behavior and historical version claims are not all verified.
+> **NativeCmpKit migration:** this inherited API guide is being maintained in the independent repository. New coordinates are **unpublished**; see [installation](../installation.md) and the source audit. Platform behavior and historical version claims are not all verified.
 
-Calf provides two different alert dialog composables that adapt to the platform they're running on:
+Kira provides two different alert dialog composables that adapt to the platform they're running on:
 
 1. **AdaptiveAlertDialog**: A simpler API with predefined confirm and dismiss buttons
 2. **AdaptiveBasicAlertDialog**: A more flexible API that allows fully custom content on Material platforms and advanced configuration on iOS
@@ -43,7 +43,7 @@ if (showDialog) {
         confirmText = "OK",
         dismissText = "Cancel",
         title = "Alert Dialog",
-        text = "This is a native alert dialog from Calf",
+        text = "This is a native alert dialog from Kira",
         // Optional: Customize iOS dialog style
         iosDialogStyle = AlertDialogIosStyle.Alert, // or ActionSheet
         iosConfirmButtonStyle = AlertDialogIosActionStyle.Default,
@@ -72,7 +72,7 @@ if (showInfoDialog) {
 
 ## AdaptiveBasicAlertDialog
 
-The `AdaptiveBasicAlertDialog` composable provides a more flexible API that allows fully custom content on Material platforms and advanced configuration on iOS through the `iosProperties` parameter. It's marked with `@ExperimentalCalfUiApi` annotation.
+The `AdaptiveBasicAlertDialog` composable provides a more flexible API that allows fully custom content on Material platforms and advanced configuration on iOS through the `iosProperties` parameter. It's marked with `@ExperimentalKiraUiApi` annotation.
 
 ```kotlin
 // State to control dialog visibility

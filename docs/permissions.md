@@ -1,16 +1,16 @@
 ---
 render_macros: true
 ---
-<!-- Modified for nativeCmpkit migration (2026-10-24): independent coordinates / project references; inherited APIs retained. -->
+<!-- Modified for NativeCmpKit migration (2026-10-24): independent coordinates / project references; inherited APIs retained. -->
 # Permissions
 
-> **nativeCmpkit migration:** new coordinates are **unpublished**. See [installation](installation.md) and the [source audit](audit/README.md). Historical Calf version claims are preserved, not certified as nativeCmpkit releases.
+> **NativeCmpKit migration:** new coordinates are **unpublished**. See [installation](installation.md) and the [source audit](audit/README.md). Historical Kira version claims are preserved, not certified as NativeCmpKit releases.
 
-Calf Permissions provides a Compose Multiplatform API for requesting and observing runtime permissions on Android and iOS.
+Kira Permissions provides a Compose Multiplatform API for requesting and observing runtime permissions on Android and iOS.
 
 ## Why Modular Permissions?
 
-Calf Permissions is split into **individual modules per permission type** instead of shipping as a single monolithic library. This architecture offers several important benefits:
+Kira Permissions is split into **individual modules per permission type** instead of shipping as a single monolithic library. This architecture offers several important benefits:
 
 ### iOS App Store Compliance
 
@@ -32,27 +32,27 @@ Add only the permission modules your app actually needs to your module `build.gr
 
 ```kotlin
 // Core (required — provides the base API)
-implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-permissions-core:{{ nativecmpkit_version }}")
+implementation("io.github.apdelrahman1911.nativecmpkit:kira-permissions-core:{{ nativecmpkit_version }}")
 
 // Add only the permissions you need:
-implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-permissions-camera:{{ nativecmpkit_version }}")
-implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-permissions-microphone:{{ nativecmpkit_version }}")
-implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-permissions-gallery:{{ nativecmpkit_version }}")
-implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-permissions-location:{{ nativecmpkit_version }}")
-implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-permissions-background-location:{{ nativecmpkit_version }}")
-implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-permissions-bluetooth:{{ nativecmpkit_version }}")
-implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-permissions-contacts:{{ nativecmpkit_version }}")
-implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-permissions-calendar:{{ nativecmpkit_version }}")
-implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-permissions-notifications:{{ nativecmpkit_version }}")
-implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-permissions-wifi:{{ nativecmpkit_version }}")
+implementation("io.github.apdelrahman1911.nativecmpkit:kira-permissions-camera:{{ nativecmpkit_version }}")
+implementation("io.github.apdelrahman1911.nativecmpkit:kira-permissions-microphone:{{ nativecmpkit_version }}")
+implementation("io.github.apdelrahman1911.nativecmpkit:kira-permissions-gallery:{{ nativecmpkit_version }}")
+implementation("io.github.apdelrahman1911.nativecmpkit:kira-permissions-location:{{ nativecmpkit_version }}")
+implementation("io.github.apdelrahman1911.nativecmpkit:kira-permissions-background-location:{{ nativecmpkit_version }}")
+implementation("io.github.apdelrahman1911.nativecmpkit:kira-permissions-bluetooth:{{ nativecmpkit_version }}")
+implementation("io.github.apdelrahman1911.nativecmpkit:kira-permissions-contacts:{{ nativecmpkit_version }}")
+implementation("io.github.apdelrahman1911.nativecmpkit:kira-permissions-calendar:{{ nativecmpkit_version }}")
+implementation("io.github.apdelrahman1911.nativecmpkit:kira-permissions-notifications:{{ nativecmpkit_version }}")
+implementation("io.github.apdelrahman1911.nativecmpkit:kira-permissions-wifi:{{ nativecmpkit_version }}")
 ```
 
 For example, if your app only needs camera and location permissions:
 
 ```kotlin
-implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-permissions-core:{{ nativecmpkit_version }}")
-implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-permissions-camera:{{ nativecmpkit_version }}")
-implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-permissions-location:{{ nativecmpkit_version }}")
+implementation("io.github.apdelrahman1911.nativecmpkit:kira-permissions-core:{{ nativecmpkit_version }}")
+implementation("io.github.apdelrahman1911.nativecmpkit:kira-permissions-camera:{{ nativecmpkit_version }}")
+implementation("io.github.apdelrahman1911.nativecmpkit:kira-permissions-location:{{ nativecmpkit_version }}")
 ```
 
 ### Option 2: Umbrella Module
@@ -60,7 +60,7 @@ implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-permissions-
 If you want all permissions at once (not recommended for iOS App Store submissions):
 
 ```kotlin
-implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-permissions:{{ nativecmpkit_version }}")
+implementation("io.github.apdelrahman1911.nativecmpkit:kira-permissions:{{ nativecmpkit_version }}")
 ```
 
 !!! warning
@@ -71,22 +71,22 @@ implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-permissions:
 The permissions library is organized as follows:
 
 ```
-calf-permissions/
+kira-permissions/
 ├── build.gradle.kts          ← umbrella module (includes all)
-├── core/                     ← calf-permissions-core (base API + permissions that don't require adding keys to `Info.plist`)
-├── camera/                   ← calf-permissions-camera
-├── microphone/               ← calf-permissions-microphone
-├── gallery/                  ← calf-permissions-gallery
-├── location/                 ← calf-permissions-location
-├── background-location/      ← calf-permissions-background-location
-├── bluetooth/                ← calf-permissions-bluetooth
-├── contacts/                 ← calf-permissions-contacts
-├── calendar/                 ← calf-permissions-calendar
-├── notifications/            ← calf-permissions-notifications
-└── wifi/                     ← calf-permissions-wifi
+├── core/                     ← kira-permissions-core (base API + permissions that don't require adding keys to `Info.plist`)
+├── camera/                   ← kira-permissions-camera
+├── microphone/               ← kira-permissions-microphone
+├── gallery/                  ← kira-permissions-gallery
+├── location/                 ← kira-permissions-location
+├── background-location/      ← kira-permissions-background-location
+├── bluetooth/                ← kira-permissions-bluetooth
+├── contacts/                 ← kira-permissions-contacts
+├── calendar/                 ← kira-permissions-calendar
+├── notifications/            ← kira-permissions-notifications
+└── wifi/                     ← kira-permissions-wifi
 ```
 
-Each module depends on `calf-permissions-core`, which provides the shared API (`Permission`, `PermissionState`, `rememberPermissionState`, etc.). The platform-specific permission handling is implemented in each individual module.
+Each module depends on `kira-permissions-core`, which provides the shared API (`Permission`, `PermissionState`, `rememberPermissionState`, etc.). The platform-specific permission handling is implemented in each individual module.
 
 Permissions that don't require adding a reason in the iOS `Info.plist` (because they are always granted on iOS) are included directly in the **core** module. This includes storage permissions (`ReadStorage`, `WriteStorage`), `ReadAudio`, and `Call`.
 
@@ -144,7 +144,7 @@ if (multiplePermissionsState.allPermissionsGranted) {
 
 ### Core Permissions
 
-The following permissions are included in the **core** module (`calf-permissions-core`) because they are always granted on iOS and don't require an `Info.plist` entry.
+The following permissions are included in the **core** module (`kira-permissions-core`) because they are always granted on iOS and don't require an `Info.plist` entry.
 
 #### Storage Permissions
 
@@ -216,7 +216,7 @@ This permission is always granted on iOS.
 
 ### Gallery Permissions
 
-**Module:** `calf-permissions-gallery`
+**Module:** `kira-permissions-gallery`
 
 To request gallery permissions, use `Permission.Gallery`, `Permission.ReadImage`, or `Permission.ReadVideo`.
 
@@ -291,7 +291,7 @@ The string value is the message that will be displayed to the user when the perm
 
 ### Location Permissions
 
-**Module:** `calf-permissions-location`
+**Module:** `kira-permissions-location`
 
 To request the location permission, use `Permission.FineLocation` or `Permission.CoarseLocation`.
 
@@ -319,12 +319,12 @@ The string value is the message that will be displayed to the user when the perm
 
 ### Background Location Permission
 
-**Module:** `calf-permissions-background-location`
+**Module:** `kira-permissions-background-location`
 
 To request the background location permission, use `Permission.BackgroundLocation`.
 
 !!! note
-    This is a separate module from `calf-permissions-location` to avoid requiring `NSLocationAlwaysAndWhenInUseUsageDescription` in your iOS `Info.plist` when you only need foreground location.
+    This is a separate module from `kira-permissions-location` to avoid requiring `NSLocationAlwaysAndWhenInUseUsageDescription` in your iOS `Info.plist` when you only need foreground location.
 
 #### Android
 
@@ -356,7 +356,7 @@ You also need to enable the **Location updates** background mode in your Xcode p
 
 ### Notification Permissions
 
-**Module:** `calf-permissions-notifications`
+**Module:** `kira-permissions-notifications`
 
 #### Post Notifications Permission
 
@@ -364,7 +364,7 @@ To request the post notifications permission, use `Permission.Notification`.
 
 ##### Android
 
-The `android.permission.POST_NOTIFICATIONS` permission is automatically included via manifest merger when you add the `calf-permissions-notifications` dependency. No manual manifest entry is needed.
+The `android.permission.POST_NOTIFICATIONS` permission is automatically included via manifest merger when you add the `kira-permissions-notifications` dependency. No manual manifest entry is needed.
 
 This permission applies to Android API 33 and up. On older versions, notifications are allowed by default.
 
@@ -384,7 +384,7 @@ No `Info.plist` entry is required.
 
 ### Camera Permission
 
-**Module:** `calf-permissions-camera`
+**Module:** `kira-permissions-camera`
 
 To request the camera permission, use `Permission.Camera`.
 
@@ -409,7 +409,7 @@ The string value is the message that will be displayed to the user when the perm
 
 ### Record Audio Permission
 
-**Module:** `calf-permissions-microphone`
+**Module:** `kira-permissions-microphone`
 
 To request the record audio permission, use `Permission.RecordAudio`.
 
@@ -434,7 +434,7 @@ The string value is the message that will be displayed to the user when the perm
 
 ### Bluetooth Permissions
 
-**Module:** `calf-permissions-bluetooth`
+**Module:** `kira-permissions-bluetooth`
 
 To request bluetooth permissions, use `Permission.BluetoothLe`, `Permission.BluetoothScan`, `Permission.BluetoothConnect`, or `Permission.BluetoothAdvertise`.
 
@@ -466,7 +466,7 @@ The string value is the message that will be displayed to the user when the perm
 
 ### Contacts Permissions
 
-**Module:** `calf-permissions-contacts`
+**Module:** `kira-permissions-contacts`
 
 To request contacts permissions, use `Permission.ReadContacts` or `Permission.WriteContacts`.
 
@@ -494,7 +494,7 @@ The string value is the message that will be displayed to the user when the perm
 
 ### Calendar Permissions
 
-**Module:** `calf-permissions-calendar`
+**Module:** `kira-permissions-calendar`
 
 To request calendar permissions, use `Permission.ReadCalendar` or `Permission.WriteCalendar`.
 
@@ -522,7 +522,7 @@ The string value is the message that will be displayed to the user when the perm
 
 ### Wi-Fi Permissions
 
-**Module:** `calf-permissions-wifi`
+**Module:** `kira-permissions-wifi`
 
 To request Wi-Fi permissions, use `Permission.WifiAccessState`, `Permission.WifiChangeState`, or `Permission.WifiNearbyDevices`.
 

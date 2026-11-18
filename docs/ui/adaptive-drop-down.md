@@ -1,7 +1,7 @@
-<!-- Modified for nativeCmpkit migration (2026-10-24): independent coordinates / project references; inherited APIs retained. -->
+<!-- Modified for NativeCmpKit migration (2026-10-24): independent coordinates / project references; inherited APIs retained. -->
 # Drop Down
 
-> **nativeCmpkit migration:** this inherited API guide is being maintained in the independent repository. New coordinates are **unpublished**; see [installation](../installation.md) and the source audit. Platform behavior and historical version claims are not all verified.
+> **NativeCmpKit migration:** this inherited API guide is being maintained in the independent repository. New coordinates are **unpublished**; see [installation](../installation.md) and the source audit. Platform behavior and historical version claims are not all verified.
 
 `AdaptiveDropDown` is an adaptive drop-down menu that uses a native pull-down menu via `UIButton.menu` on iOS and Material3's `DropdownMenu` on other platforms (Android, Desktop, Web).
 
@@ -14,7 +14,7 @@ On iOS, this provides the system drop-down experience with `showsMenuAsPrimaryAc
 ## Usage
 
 ```kotlin
-@OptIn(ExperimentalCalfUiApi::class)
+@OptIn(ExperimentalKiraUiApi::class)
 @Composable
 fun MyDropDown() {
     var expanded by remember { mutableStateOf(false) }
@@ -87,7 +87,7 @@ AdaptiveDropDownItem(
 ```
 
 !!! tip
-    Use type-safe `SFSymbol` constants from `calf-ui` instead of raw strings. See [SF Symbols & Cupertino Icons](../sf-symbols.md) for details.
+    Use type-safe `SFSymbol` constants from `kira-ui` instead of raw strings. See [SF Symbols & Cupertino Icons](../sf-symbols.md) for details.
 
 ## Sections
 

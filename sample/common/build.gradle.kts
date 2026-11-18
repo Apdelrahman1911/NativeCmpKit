@@ -11,8 +11,8 @@ kotlin {
             baseName = "Common"
             isStatic = true
 
-            // IMPORTANT: Exporting calf-ui is required for some functionalities to work
-            export(projects.calfUi)
+            // IMPORTANT: Exporting kira-ui is required for some functionalities to work
+            export(projects.kiraUi)
         }
     }
 
@@ -23,17 +23,17 @@ kotlin {
 
         implementation(libs.kotlinx.datetime)
 
-        // Calf
-        api(projects.calfUi)
-        implementation(projects.calfFilePicker)
-        implementation(projects.calfFilePickerCoil)
-        implementation(projects.calfPermissions)
-        implementation(projects.calfWebview)
+        // Kira
+        api(projects.kiraUi)
+        implementation(projects.kiraFilePicker)
+        implementation(projects.kiraFilePickerCoil)
+        implementation(projects.kiraPermissions)
+        implementation(projects.kiraWebview)
         implementation(libs.jetbrains.navigation.compose)
-        implementation(projects.calfNavigation)
-        implementation(projects.calfCameraPicker)
-        implementation(projects.calfShare)
-        implementation(projects.calfCupertinoIcons)
+        implementation(projects.kiraNavigation)
+        implementation(projects.kiraCameraPicker)
+        implementation(projects.kiraShare)
+        implementation(projects.kiraCupertinoIcons)
 
         // Coil
         implementation(libs.coil.compose)

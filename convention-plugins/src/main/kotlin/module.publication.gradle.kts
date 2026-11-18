@@ -1,18 +1,53 @@
-// Modified for nativeCmpkit migration (2026-10-24); upstream authorship is retained below.
+import org.gradle.api.tasks.bundling.Zip
+import org.gradle.jvm.tasks.Jar
+
 plugins {
     id("com.vanniktech.maven.publish")
 }
 
-mavenPublishing {
-    publishToMavenCentral()
-    signAllPublications()
+val component = project.name
+val repositoryRoot = rootProject.layout.projectDirectory
+val noticeFiles = files(repositoryRoot.file("LICENSE"), repositoryRoot.file("NOTICE"), repositoryRoot.file("THIRD_PARTY_NOTICES.md"))
+val publicationNotices = tasks.register<Zip>("publicationNotices") {
+    archiveClassifier.set("notices")
+    from(noticeFiles)
+    from(repositoryRoot.dir("licenses")) { into("licenses") }
+    if (component in setOf("kira-file-picker", "kira-share")) {
+        from(rootProject.layout.buildDirectory.dir("native-notices/$component")) {
+            into("native-dependencies")
+        }
+    }
+    isPreserveFileTimestamps = false
+    isReproducibleFileOrder = true
+}
 
-    coordinates(group.toString(), "nativecmpkit-" + project.name.removePrefix("calf-"), version.toString())
+tasks.withType<Jar>().configureEach {
+    from(noticeFiles) { into("META-INF/nativecmpkit/$component") }
+    if (name.endsWith("JavadocJar", ignoreCase = true)) {
+        from(repositoryRoot.file("README.md"))
+    }
+}
+tasks.withType<Zip>().matching { it.name.endsWith("Aar") }.configureEach {
+    from(noticeFiles) { into("META-INF/nativecmpkit/$component") }
+}
+publishing.publications.withType<MavenPublication>().configureEach {
+    artifact(publicationNotices)
+}
+
+mavenPublishing {
+    publishToMavenCentral(automaticRelease = false)
+    // CI uses an isolated Maven Local repository to inspect unsigned candidates.
+    // The root build rejects all remote publishing in this mode.
+    if (providers.gradleProperty("nativecmpkit.verification").orNull != "true") {
+        signAllPublications()
+    }
+
+    coordinates(group.toString(), component, version.toString())
 
     pom {
-        name.set("nativeCmpkit - " + project.name.removePrefix("calf-"))
-        description.set("Independent Kotlin Multiplatform native component toolkit, derived from Calf under Apache-2.0.")
-        url.set("https://github.com/Apdelrahman1911/nativeCmpkit")
+        name.set("NativeCmpKit $component")
+        description.set("The $component component of NativeCmpKit for Kotlin Multiplatform.")
+        url.set("https://github.com/Apdelrahman1911/NativeCmpKit")
 
         licenses {
             license {
@@ -23,23 +58,18 @@ mavenPublishing {
         developers {
             developer {
                 id.set("Apdelrahman1911")
-                name.set("abdelrahman fahmy")
+                name.set("Abdelrahman Fahmy")
                 url.set("https://github.com/Apdelrahman1911")
-            }
-            developer {
-                id.set("MohamedRejeb")
-                name.set("Mohamed Rejeb")
-                email.set("mohamedrejeb445@gmail.com")
             }
         }
         issueManagement {
-            system.set("Github")
-            url.set("https://github.com/Apdelrahman1911/nativeCmpkit/issues")
+            system.set("GitHub")
+            url.set("https://github.com/Apdelrahman1911/NativeCmpKit/issues")
         }
         scm {
-            connection.set("scm:git:https://github.com/Apdelrahman1911/nativeCmpkit.git")
-            developerConnection.set("scm:git:ssh://git@github.com/Apdelrahman1911/nativeCmpkit.git")
-            url.set("https://github.com/Apdelrahman1911/nativeCmpkit")
+            connection.set("scm:git:https://github.com/Apdelrahman1911/NativeCmpKit.git")
+            developerConnection.set("scm:git:ssh://git@github.com/Apdelrahman1911/NativeCmpKit.git")
+            url.set("https://github.com/Apdelrahman1911/NativeCmpKit")
         }
     }
 }

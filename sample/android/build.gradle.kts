@@ -1,4 +1,4 @@
-// Modified for nativeCmpkit migration (2026-10-24): sample identity only.
+// Modified for NativeCmpKit migration (2026-10-24): sample identity only.
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeCompiler)

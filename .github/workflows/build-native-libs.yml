@@ -1,29 +1,167 @@
-# Modified for nativeCmpkit migration (2026-10-24).
-# Manual compile verification only. No artifact upload, signing, release or package publication.
-name: nativeCmpkit native compile verification
+name: NativeCmpKit Maven candidate verification
+
 on:
   workflow_dispatch:
+
 permissions:
   contents: read
+  actions: read
+
+env:
+  CARGO_BUILD_JOBS: '2'
+
 jobs:
   native-check:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-26, windows-latest]
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+        include:
+          - { platform: linux-x64, runner: ubuntu-24.04 }
+          - { platform: linux-arm64, runner: ubuntu-24.04-arm }
+          - { platform: macos-x64, runner: macos-15-intel }
+          - { platform: macos-arm64, runner: macos-26 }
+          - { platform: windows-x64, runner: windows-2022 }
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 40
+    env:
+      NATIVE_PLATFORM: ${{ matrix.platform }}
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
       - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
         with:
           toolchain: '1.98.0'
-      - name: Linux native dialog dependencies
+      - name: Linux native build dependencies
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev
-      - name: File-picker native checks
-        working-directory: calf-file-picker/native
-        run: cargo test
-      - name: Share native checks
-        working-directory: calf-share/native
-        run: cargo test
+        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libwayland-dev
+      - name: Produce and verify locked native payloads
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          version="$(python -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')"
+          for module in kira-file-picker kira-share; do
+            python scripts/native/artifacts.py --module "$module" --platform "$NATIVE_PLATFORM" \
+              --version "$version" --output "$PWD/build/native-payload/$module" \
+              --cargo-target-dir "$PWD/build/rust/$module" build
+            python scripts/native/artifacts.py --module "$module" --platform "$NATIVE_PLATFORM" \
+              --version "$version" --input "$PWD/build/native-payload/$module" --require-clean verify
+          done
+          python -m scripts.publishing.verify_native_exports build/native-payload
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: native-payload-${{ matrix.platform }}
+          path: build/native-payload/
+          if-no-files-found: error
+          retention-days: 7
+
+  stage-maven:
+    needs: native-check
+    runs-on: macos-26
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/wrapper-validation@3f5f9adaf7d9fecd50b5935e54106014257a94e6
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: '1.98.0'
+      - name: Retrieve and assemble the five payloads
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download "$GITHUB_RUN_ID" --pattern 'native-payload-*' --dir build/downloaded-native
+          version="$(python3 -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')"
+          python3 -m scripts.publishing.assemble_native build/downloaded-native build/native-release "$version"
+      - name: Install configured Android platform on the runner
+        run: |
+          sdkmanager="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$sdkmanager" ]; then sdkmanager="$(command -v sdkmanager)"; fi
+          "$sdkmanager" 'platforms;android-37.0'
+      - name: Collect notices from locked native dependencies
+        run: |
+          for module in kira-file-picker kira-share; do
+            cargo fetch --locked --manifest-path "$module/native/Cargo.toml"
+          done
+          python3 -m scripts.publishing.collect_native_notices "${CARGO_HOME:-$HOME/.cargo}"
+      - name: Stage and verify the complete unsigned Maven candidate
+        run: |
+          version="$(python3 -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')"
+          ./gradlew --no-daemon --no-configuration-cache --no-parallel --max-workers=1 \
+            '-Dorg.gradle.jvmargs=-Xmx3072m -Dfile.encoding=UTF-8' \
+            -Pkotlin.compiler.execution.strategy=in-process -Pnativecmpkit.verification=true \
+            -Pnativecmpkit.version="$version" -PnativecmpkitNativeMode=release \
+            -PnativecmpkitNativePrebuiltDir="$PWD/build/native-release" \
+            -Dmaven.repo.local="$PWD/build/candidate-maven" publishToMavenLocal
+          python3 scripts/publishing/verify_candidate.py --repository build/candidate-maven \
+            --prepare-consumers build/clean-consumer
+      - name: Compile every component in its own external consumer
+        run: |
+          ./gradlew -p build/clean-consumer --no-daemon --no-configuration-cache --no-parallel --max-workers=1 \
+            '-Dorg.gradle.jvmargs=-Xmx3072m -Dfile.encoding=UTF-8' \
+            -Pkotlin.compiler.execution.strategy=in-process \
+            -PnativecmpkitRepository="$PWD/build/candidate-maven" \
+            compileCommonMainKotlinMetadata compileAndroidMain verifyDesktopResolution \
+            compileKotlinIosArm64 compileKotlinIosSimulatorArm64 compileKotlinJs compileKotlinWasmJs
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: maven-candidate
+          path: build/candidate-maven/
+          if-no-files-found: error
+          retention-days: 7
+
+  webview-consumer:
+    needs: stage-maven
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm, macos-15-intel, macos-26, windows-2022]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/wrapper-validation@3f5f9adaf7d9fecd50b5935e54106014257a94e6
+      - name: Retrieve the exact Maven candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: gh run download "$GITHUB_RUN_ID" --name maven-candidate --dir build/candidate-maven
+      - name: Exercise the published WebView with both Gradle and Maven metadata
+        shell: bash
+        run: |
+          version="$(python -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')"
+          runner=()
+          if [ "$RUNNER_OS" = Linux ]; then runner=(xvfb-run -a); fi
+          for mode in module pom; do
+            "${runner[@]}" ./gradlew -p tests/publishing/webview --no-daemon --max-workers=1 \
+              '-Dorg.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8' \
+              -Pkotlin.compiler.execution.strategy=in-process \
+              -PnativecmpkitVersion="$version" -PnativecmpkitRepository="$PWD/build/candidate-maven" \
+              -PnativecmpkitMetadataMode="$mode" test
+          done
+
+  candidate-notices:
+    needs: [stage-maven, webview-consumer]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: Retrieve the verified artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download "$GITHUB_RUN_ID" --name maven-candidate --dir build/candidate-maven
+      - name: Check the accompanying locked native license materials
+        run: python3 scripts/publishing/verify_candidate.py --repository build/candidate-maven --require-native-notices

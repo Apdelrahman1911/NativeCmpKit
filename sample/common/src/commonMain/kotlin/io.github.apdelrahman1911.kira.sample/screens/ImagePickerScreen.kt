@@ -1,0 +1,138 @@
+package io.github.apdelrahman1911.kira.sample.screens
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import io.github.apdelrahman1911.kira.io.KmpFile
+import io.github.apdelrahman1911.kira.picker.FilePickerFileType
+import io.github.apdelrahman1911.kira.picker.FilePickerSelectionMode
+import io.github.apdelrahman1911.kira.picker.FilePickerSettings
+import io.github.apdelrahman1911.kira.picker.ImageRepresentationMode
+import io.github.apdelrahman1911.kira.picker.rememberFilePickerLauncher
+import io.github.apdelrahman1911.kira.sample.components.SampleScreenScaffold
+import io.github.apdelrahman1911.kira.ui.button.AdaptiveButton
+import io.github.apdelrahman1911.kira.ui.toggle.AdaptiveSwitch
+
+@Composable
+fun ImagePickerScreen(navigateBack: () -> Unit) {
+    var files by remember { mutableStateOf<List<KmpFile>>(emptyList()) }
+    var isMultiple by remember { mutableStateOf(false) }
+
+    val singlePickerLauncher = rememberFilePickerLauncher(
+        type = FilePickerFileType.Image,
+        selectionMode = FilePickerSelectionMode.Single,
+        settings = FilePickerSettings(
+            title = "Pick an image",
+            imageRepresentationMode = ImageRepresentationMode.Compatible,
+        ),
+        onResult = { files = it },
+    )
+
+    val multiplePickerLauncher = rememberFilePickerLauncher(
+        type = FilePickerFileType.Image,
+        selectionMode = FilePickerSelectionMode.Multiple,
+        settings = FilePickerSettings(
+            title = "Pick images",
+            imageRepresentationMode = ImageRepresentationMode.Compatible,
+        ),
+        onResult = { files = it },
+    )
+
+    SampleScreenScaffold(
+        title = "Image Picker",
+        navigateBack = navigateBack,
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+        ) {
+            Text(
+                text = "Image selection using native photo library pickers.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "Select multiple images?",
+                    modifier = Modifier.weight(1f),
+                )
+                AdaptiveSwitch(
+                    checked = isMultiple,
+                    onCheckedChange = { isMultiple = it },
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            AdaptiveButton(
+                onClick = {
+                    if (isMultiple) {
+                        multiplePickerLauncher.launch()
+                    } else {
+                        singlePickerLauncher.launch()
+                    }
+                },
+            ) {
+                Text("Pick Image")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            HorizontalDivider()
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = when {
+                    files.isEmpty() -> "No images selected"
+                    files.size == 1 -> "1 image picked:"
+                    else -> "${files.size} images picked:"
+                },
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            files.forEach { file ->
+                AsyncImage(
+                    model = file,
+                    contentDescription = "Picked image",
+                    contentScale = ContentScale.FillWidth,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                        .clip(MaterialTheme.shapes.medium),
+                )
+            }
+        }
+    }
+}

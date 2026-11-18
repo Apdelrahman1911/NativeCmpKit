@@ -1,10 +1,10 @@
-# Modified for nativeCmpkit migration (2026-10-24). This config has not been deployed.
+# Modified for NativeCmpKit migration (2026-10-24). This config has not been deployed.
 # An unintended legacy Pages event is documented in docs/migration/pages-incident.md.
 # Project information
-site_name: 'nativeCmpkit'
+site_name: 'NativeCmpKit'
 site_description: 'A library that allows you to easily create adaptive UIs and access platform specific APIs from your Compose Multiplatform apps.'
-site_author: 'nativeCmpkit contributors; original Calf authors credited in NOTICE'
-site_url: 'https://apdelrahman1911.github.io/nativeCmpkit/'
+site_author: 'Abdelrahman Fahmy and NativeCmpKit contributors'
+site_url: 'https://apdelrahman1911.github.io/NativeCmpKit/'
 # Reserved for a future owner-authorized deployment; preserved upstream gh-pages is immutable.
 remote_branch: nativecmpkit-pages
 edit_uri: ""
@@ -24,8 +24,8 @@ exclude_docs: |
   audit/issue-drafts/**
 
 # Repository
-repo_name: 'Apdelrahman1911/nativeCmpkit'
-repo_url: 'https://github.com/Apdelrahman1911/nativeCmpkit'
+repo_name: 'Apdelrahman1911/NativeCmpKit'
+repo_url: 'https://github.com/Apdelrahman1911/NativeCmpKit'
 
 # Configuration
 theme:
@@ -52,10 +52,10 @@ theme:
 
 # Social
 extra:
-  nativecmpkit_version: '0.1.0-SNAPSHOT'
+  nativecmpkit_version: '0.1.0-preview.1'
   social:
     - icon: fontawesome/brands/github-alt
-      link: https://github.com/Apdelrahman1911/nativeCmpkit
+      link: https://github.com/Apdelrahman1911/NativeCmpKit
 
 # Navigation
 nav:
@@ -132,5 +132,5 @@ plugins:
 
 # Copyright
 copyright: |
-  &copy; 2025 <a href="https://github.com/MohamedRejeb"  target="_blank" rel="noopener">Mohamed Rejeb</a>
-  <br>Migration additions &copy; 2026 nativeCmpkit contributors. Independently maintained; no endorsement implied.
+  <a href="https://github.com/Apdelrahman1911">Abdelrahman Fahmy</a> and NativeCmpKit contributors. Original copyright and attribution are in NOTICE.
+  <br>Migration additions &copy; 2026 NativeCmpKit contributors. Independently maintained; no endorsement implied.

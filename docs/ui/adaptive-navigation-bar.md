@@ -1,7 +1,7 @@
-<!-- Modified for nativeCmpkit migration (2026-10-24): independent coordinates / project references; inherited APIs retained. -->
+<!-- Modified for NativeCmpKit migration (2026-10-24): independent coordinates / project references; inherited APIs retained. -->
 # Navigation Bar
 
-> **nativeCmpkit migration:** this inherited API guide is being maintained in the independent repository. New coordinates are **unpublished**; see [installation](../installation.md) and the source audit. Platform behavior and historical version claims are not all verified.
+> **NativeCmpKit migration:** this inherited API guide is being maintained in the independent repository. New coordinates are **unpublished**; see [installation](../installation.md) and the source audit. Platform behavior and historical version claims are not all verified.
 
 `AdaptiveNavigationBar` is an adaptive navigation bar that uses UIKit's `UITabBar` on iOS and Material3's `NavigationBar` on other platforms (Android, Desktop, Web).
 
@@ -14,7 +14,7 @@ On iOS, the native UITabBar is created using the `iosItems`, `iosSelectedIndex`,
 ## Usage
 
 ```kotlin
-@OptIn(ExperimentalCalfUiApi::class)
+@OptIn(ExperimentalKiraUiApi::class)
 @Composable
 fun MyNavigationBar() {
     var selectedIndex by remember { mutableIntStateOf(0) }
@@ -94,4 +94,4 @@ UIKitUITabBarItem(
 ```
 
 !!! tip
-    Use type-safe `SFSymbol` constants from `calf-ui` instead of raw strings. See [SF Symbols & Cupertino Icons](../sf-symbols.md) for details.
+    Use type-safe `SFSymbol` constants from `kira-ui` instead of raw strings. See [SF Symbols & Cupertino Icons](../sf-symbols.md) for details.

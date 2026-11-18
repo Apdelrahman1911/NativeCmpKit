@@ -1,12 +1,12 @@
 # Security policy
 
-nativeCmpkit is an independently maintained, unreleased migration. No version is
+NativeCmpKit is an independently maintained, unreleased migration. No version is
 currently certified production-ready. See `docs/audit/` for source-confirmed
 problems, advisory matches, and limitations; a source finding is not automatically
 a demonstrated exploit.
 
 Private vulnerability reporting is enabled for this repository. Use
-https://github.com/Apdelrahman1911/nativeCmpkit/security/advisories/new rather than
+https://github.com/Apdelrahman1911/NativeCmpKit/security/advisories/new rather than
 posting credentials, private data, or weaponized exploit details publicly.
 
 Never run publication, release or deployment tasks without explicit owner

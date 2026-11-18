@@ -51,8 +51,8 @@ documented action rather than imaginary recipient delivery.
 
 ## JavaFX-specific prerequisites
 
-`calf-webview` compiles against JavaFX 19. Desktop applications that use
-`nativecmpkit-webview` must supply the JavaFX `base`, `graphics`, `controls`,
+`kira-webview` compiles against JavaFX 19. Desktop applications that use
+`kira-webview` must supply the JavaFX `base`, `graphics`, `controls`,
 `media`, `web`, and `swing` modules for the target operating system and
 architecture. Use the same version and classifier for all six. The desktop
 sample's `desktop.javafx` convention selects a classifier for the current host.

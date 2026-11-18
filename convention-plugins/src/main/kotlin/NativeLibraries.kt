@@ -13,7 +13,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
  * enter a manifest; unrelated checkout files are never inspected by this build.
  */
 fun Project.configureNativeLibrary() {
-    check(name in setOf("calf-file-picker", "calf-share")) { "Unexpected native module $path" }
+    check(name in setOf("kira-file-picker", "kira-share")) { "Unexpected native module $path" }
     val moduleName = name
     val root = rootProject.layout.projectDirectory
     val script = root.file("scripts/native/artifacts.py")

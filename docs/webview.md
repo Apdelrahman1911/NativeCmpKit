@@ -1,10 +1,10 @@
 ---
 render_macros: true
 ---
-<!-- Modified for nativeCmpkit migration (2026-10-24): independent coordinates / project references; inherited APIs retained. -->
+<!-- Modified for NativeCmpKit migration (2026-10-24): independent coordinates / project references; inherited APIs retained. -->
 # Web View
 
-> **nativeCmpkit migration:** new coordinates are **unpublished**. See [installation](installation.md) and the [source audit](audit/README.md). Historical Calf version claims are preserved, not certified as nativeCmpkit releases.
+> **NativeCmpKit migration:** new coordinates are **unpublished**. See [installation](installation.md) and the [source audit](audit/README.md). Historical Kira version claims are preserved, not certified as NativeCmpKit releases.
 
 ## Installation
 
@@ -12,7 +12,7 @@ render_macros: true
 Add the following dependency to your module `build.gradle.kts` file:
 
 ```kotlin
-implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-webview:{{ nativecmpkit_version }}")
+implementation("io.github.apdelrahman1911.nativecmpkit:kira-webview:{{ nativecmpkit_version }}")
 ```
 
 ## Usage
@@ -25,7 +25,7 @@ implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-webview:{{ n
 
 ```kotlin
 val state = rememberWebViewState(
-    url = "https://github.com/Apdelrahman1911/nativeCmpkit"
+    url = "https://github.com/Apdelrahman1911/NativeCmpKit"
 )
 
 LaunchedEffect(state.isLoading) {
@@ -45,7 +45,7 @@ You can customize the web view settings by changing the `WebSettings` object in 
 
 ```kotlin
 val state = rememberWebViewState(
-    url = "https://github.com/Apdelrahman1911/nativeCmpkit"
+    url = "https://github.com/Apdelrahman1911/NativeCmpKit"
 )
 
 LaunchedEffect(Unit) {
@@ -63,7 +63,7 @@ You can call JavaScript functions from the web view by using the `evaluateJavaSc
 
 ```kotlin
 val state = rememberWebViewState(
-    url = "https://github.com/Apdelrahman1911/nativeCmpkit"
+    url = "https://github.com/Apdelrahman1911/NativeCmpKit"
 )
 
 LaunchedEffect(Unit) {
@@ -88,7 +88,7 @@ You can manage cookies in the web view using the `CookieManager` available throu
 
 ```kotlin
 val state = rememberWebViewState(
-    url = "https://github.com/Apdelrahman1911/nativeCmpkit"
+    url = "https://github.com/Apdelrahman1911/NativeCmpKit"
 )
 
 WebView(

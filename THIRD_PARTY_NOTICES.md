@@ -1,12 +1,12 @@
 # Third-party notices
 
-nativeCmpkit retains Calf's Apache-2.0 source license and attribution; see
+NativeCmpKit retains Calf's Apache-2.0 source license and attribution; see
 `LICENSE` and `NOTICE`. Third-party components keep their own licenses. This
 document is not a certification of every transitive dependency's licensing.
 
 ## Embedded Jodd utilities and MIME database
 
-The `jodd` sources/resources in `calf-file-picker` retain their complete
+The `jodd` sources/resources in `kira-file-picker` retain their complete
 upstream two-clause BSD license headers:
 
 - `src/desktopMain/kotlin/jodd/io/IOUtil.kt`
@@ -26,7 +26,7 @@ artifact notice packaging includes them before future publication.
 
 ## Cupertino Icons font
 
-`calf-cupertino-icons/src/commonMain/composeResources/font/sf_symbols.ttf` is
+`kira-cupertino-icons/src/commonMain/composeResources/font/sf_symbols.ttf` is
 the **CupertinoIcons Version 1.08** font, not Apple's proprietary SF Symbols
 font. On 2026-10-24 its 257,628 bytes were verified byte-for-byte against
 Flutter's `cupertino_icons` package at commit
@@ -48,7 +48,7 @@ notice addition.
 
 ## Apple SF Symbol name constants
 
-`calf-ui/src/commonMain/kotlin/com/mohamedrejeb/calf/sf/symbols/SFSymbol.kt`
+`kira-ui/src/commonMain/kotlin/io/github/apdelrahman1911/kira/sf/symbols/SFSymbol.kt`
 contains string identifiers passed to Apple's system image APIs; it does
 not contain the Apple SF Symbols font or image outlines. The identifier
 catalogue and Cupertino Icons font are different components. System symbol
@@ -59,7 +59,7 @@ independently reconstructed; see `docs/audit/navigation-core-icons-sample.md`.
 
 ## Compose Cupertino slider adaptation
 
-`calf-ui/src/iosMain/kotlin/com/mohamedrejeb/calf/ui/slider/CupertinoSlider.kt`
+`kira-ui/src/iosMain/kotlin/io/github/apdelrahman1911/kira/ui/slider/CupertinoSlider.kt`
 explicitly credits the Compose Cupertino implementation at baseline lines76-80.
 The reference source at observation commit
 `f66875aa6f3848b30c38e42a89fc99c9ac24a585` carries:
@@ -67,7 +67,7 @@ The reference source at observation commit
 > Copyright (c) 2023-2024. Compose Cupertino project and open source contributors.
 
 It is licensed under Apache License2.0. Preserve this source attribution along
-with Calf/nativeCmpkit's adaptation history. The upstream license is retained
+with Calf/NativeCmpKit's adaptation history. The upstream license is retained
 verbatim in
 [licenses/compose-cupertino-Apache-2.0.txt](licenses/compose-cupertino-Apache-2.0.txt),
 including its separate JetBrains2020-2021/respective-authors attribution.
@@ -80,7 +80,7 @@ originally copied into Calf; that import revision remains to be reconstructed.
 
 ## Kyant AndroidLiquidGlass sample adaptations
 
-The following `calf-ui/src/iosMain/kotlin/com/mohamedrejeb/calf/ui/` files are
+The following `kira-ui/src/iosMain/kotlin/io/github/apdelrahman1911/kira/ui/` files are
 adapted from the AndroidLiquidGlass reference implementation:
 
 - `button/LiquidGlassButton.kt`

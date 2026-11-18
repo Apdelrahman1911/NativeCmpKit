@@ -1,63 +1,73 @@
-<!-- Modified for nativeCmpkit migration (2026-10-24). -->
-# Installation and source development
+# Installation and development
 
-## Publication status
+The first release candidate uses version `0.1.0-preview.1` under
+`io.github.apdelrahman1911.nativecmpkit`. These coordinates are pending publication.
 
-**No nativeCmpkit package or release has been published.** The planned coordinates
-below identify the renamed build, not a currently downloadable Maven release:
+## Components
+
+Use the root multiplatform coordinate in `commonMain`. Gradle selects the Android,
+desktop JVM, iOS device, iOS simulator, JS or Wasm artifact. See the [platform
+guides](platforms/README.md) for runtime availability by feature.
+
+| Artifact ID | Direct Kira dependencies |
+| --- | --- |
+| `kira-camera-picker` | `kira-io` |
+| `kira-core` | None |
+| `kira-cupertino-icons` | None |
+| `kira-file-picker` | `kira-io` |
+| `kira-file-picker-coil` | `kira-core`, `kira-io` |
+| `kira-geo` | None |
+| `kira-io` | `kira-core` |
+| `kira-navigation` | None |
+| `kira-permissions` | `kira-permissions-core`, `kira-permissions-background-location`, `kira-permissions-bluetooth`, `kira-permissions-calendar`, `kira-permissions-camera`, `kira-permissions-contacts`, `kira-permissions-gallery`, `kira-permissions-location`, `kira-permissions-microphone`, `kira-permissions-notifications`, `kira-permissions-wifi` |
+| `kira-permissions-background-location` | `kira-permissions-core` |
+| `kira-permissions-bluetooth` | `kira-permissions-core` |
+| `kira-permissions-calendar` | `kira-permissions-core` |
+| `kira-permissions-camera` | `kira-permissions-core` |
+| `kira-permissions-contacts` | `kira-permissions-core` |
+| `kira-permissions-core` | None |
+| `kira-permissions-gallery` | `kira-permissions-core` |
+| `kira-permissions-location` | `kira-permissions-core` |
+| `kira-permissions-microphone` | `kira-permissions-core` |
+| `kira-permissions-notifications` | `kira-permissions-core` |
+| `kira-permissions-wifi` | `kira-permissions-core` |
+| `kira-share` | `kira-io` |
+| `kira-ui` | `kira-core` |
+| `kira-webview` | None |
+
+`kira-permissions` is an optional bundle of permission components. For a single
+permission, choose its leaf artifact. No toolkit-wide bundle is required.
+
+For example, after publication, add `mavenCentral()` and declare:
 
 ```kotlin
-// Future coordinates only — do not expect these to resolve from Maven Central yet.
-implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-ui:0.1.0-SNAPSHOT")
-implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-file-picker:0.1.0-SNAPSHOT")
-implementation("io.github.apdelrahman1911.nativecmpkit:nativecmpkit-permissions-camera:0.1.0-SNAPSHOT")
+implementation("io.github.apdelrahman1911.nativecmpkit:kira-ui:0.1.0-preview.1")
+implementation("io.github.apdelrahman1911.nativecmpkit:kira-permissions-camera:0.1.0-preview.1")
 ```
 
-A future publication requires owner authorization, namespace verification,
-license packaging, signing, native artifact completeness and release-gate tests.
-See [the roadmap](roadmap/README.md). Historical Calf Maven coordinates and tags
-do **not** designate nativeCmpkit builds; their history is [archived](migration/legacy/installation.upstream.md).
+Desktop WebView applications supply the JavaFX runtime for the destination OS
+and architecture. See the [desktop setup](platforms/desktop.md#javafx-specific-prerequisites).
+Navigation and Geo keep their existing experimental APIs and platform limitations.
+Maps, media and notification scheduling are prototypes without a published component.
 
-## Work with the checked-in source
+## Migrate existing source integrations
 
-Clone this independent repository and use its sample projects / Gradle project
-dependencies (`projects.calfUi`, `projects.calfFilePicker`, etc.). This avoids any
-runtime or source-fetch dependency on the original repository.
+Replace the old module coordinates with `kira-*` and update imports to
+`io.github.apdelrahman1911.kira.*`. Opt-in names use `Kira`, such as
+`ExperimentalKiraUiApi`. Regenerate any Compose resource imports and rebuild
+applications and iOS frameworks that used the old package. Old binary clients
+require their original artifacts or source pins until rebuilt. Existing Git
+commits and tags retain their original identities.
+
+## Build from source
 
 ```sh
-git clone https://github.com/Apdelrahman1911/nativeCmpkit.git
-cd nativeCmpkit
-./gradlew :calf-io:desktopTest :calf-file-picker:desktopTest
-# These require an appropriate local graphical / Android / browser environment:
-./gradlew :sample:desktop:run
-./gradlew :sample:android:assembleDebug
-./gradlew :sample:web-wasm:wasmJsBrowserDevelopmentRun
+git clone https://github.com/Apdelrahman1911/NativeCmpKit.git
+cd NativeCmpKit
+./gradlew :kira-io:desktopTest :kira-file-picker:desktopTest
 ```
 
-Required baseline: JDK 17; Kotlin 2.4.20; Compose 1.12.0; Gradle 9.7.1; Android
-SDK 37 and AGP 9.4.0; library minSdk 23, sample minSdk 24. Desktop picker/share
-builds need Rust on PATH and native host packages. A Debian/Ubuntu development
-host needs `pkg-config`, `libgtk-3-dev` and `libwayland-dev`; headless desktop tests
-also need Xvfb. The official SDK package is `platforms;android-37.0`, while the
-source remains `compileSdk = 37`. Apple builds require macOS/Xcode and the iOS SDK. Do not assume a
-sample compile or an isolated JVM probe verifies a native device flow. Exact
-attempts, overrides, results and blocked checks are in [testing](testing/README.md).
-
-## Migration compatibility contract
-
-- Replace Maven **group and artifact** when a verified release becomes available.
-- Keep imports under `com.mohamedrejeb.calf.*` for now. Public annotations, JNI
-  entry points, generated resource namespace and module paths remain stable.
-- Do not combine upstream and independent artifacts in one runtime: they define
-  the same classes. Existing users are not forced to migrate before a release.
-- The source project paths remain `:calf-*`; coordinate mappings are explicit in
-  [identity.json](migration/identity.json). Composite builds need explicit
-  substitution because Gradle project names differ from new Maven artifact IDs.
-- iOS consumers of native UI must export `projects.calfUi` from their shared
-  framework, as the sample does. Existing Swift framework names remain unchanged.
-- No binary/API compatibility certification is claimed. Preserve/add API dumps
-  and cross-target consumer tests before the first nativeCmpkit release.
-
-See [ADR 0001](decisions/0001-independent-identity.md), [module guides](modules/README.md)
-and [platform caveats](platforms/README.md). Historical compatibility tables are
-records of upstream claims, not retested support guarantees.
+Use JDK 17, Android SDK package `platforms;android-37.0` and the checked-in
+Gradle wrapper. Desktop native builds require Rust from `rust-toolchain.toml`.
+On Linux the picker requires `pkg-config` and Wayland development metadata.
+Apple WebView compilation requires macOS and Xcode.

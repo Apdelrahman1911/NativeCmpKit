@@ -1,4 +1,4 @@
-<!-- Modified for nativeCmpkit migration (2026-10-24): maintainer contact; original Covenant attribution retained. -->
+<!-- Modified for NativeCmpKit migration (2026-10-24): maintainer contact; original Covenant attribution retained. -->
 # Contributor Covenant Code of Conduct
 
 ## Our Pledge
