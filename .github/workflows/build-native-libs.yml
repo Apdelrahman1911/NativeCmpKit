@@ -2,6 +2,11 @@ name: NativeCmpKit Maven candidate verification
 
 on:
   workflow_dispatch:
+    inputs:
+      candidate_run:
+        description: Prior full staging run ID for WebView consumer rechecks only
+        type: string
+        required: false
 
 permissions:
   contents: read
@@ -12,6 +17,7 @@ env:
 
 jobs:
   native-check:
+    if: inputs.candidate_run == ''
     strategy:
       fail-fast: false
       matrix:
@@ -118,9 +124,44 @@ jobs:
             compileCommonMainKotlinMetadata compileAndroidMain verifyDesktopResolution \
             compileKotlinIosArm64 compileKotlinIosSimulatorArm64 compileKotlinJs compileKotlinWasmJs
 
-  webview-consumer:
+  consumer-artifact:
     needs: stage-maven
-    if: ${{ always() && needs.stage-maven.outputs.candidate-artifact != '' }}
+    if: ${{ always() && (inputs.candidate_run != '' || needs.stage-maven.outputs.candidate-artifact != '') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      run: ${{ steps.select.outputs.run }}
+    steps:
+      - if: inputs.candidate_run != ''
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Select the verified artifact source
+        id: select
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_RUN: ${{ inputs.candidate_run }}
+        run: |
+          if [ -z "$CANDIDATE_RUN" ]; then
+            printf 'run=%s\n' "$GITHUB_RUN_ID" >> "$GITHUB_OUTPUT"
+            exit
+          fi
+          [[ "$CANDIDATE_RUN" =~ ^[0-9]+$ ]]
+          run="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CANDIDATE_RUN")"
+          test "$(jq -r .path <<< "$run")" = .github/workflows/build-native-libs.yml
+          test "$(jq -r .head_branch <<< "$run")" = "$GITHUB_REF_NAME"
+          revision="$(jq -r .head_sha <<< "$run")"
+          git merge-base --is-ancestor "$revision" "$GITHUB_SHA"
+          git diff --exit-code "$revision" "$GITHUB_SHA" -- . \
+            ':(exclude,glob)tests/publishing/webview*/**' ':(exclude).github/workflows/build-native-libs.yml'
+          conclusion="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CANDIDATE_RUN/jobs" \
+            --jq '.jobs[] | select(.name == "stage-maven") | .conclusion')"
+          test "$conclusion" = success
+          printf 'run=%s\n' "$CANDIDATE_RUN" >> "$GITHUB_OUTPUT"
+
+  webview-consumer:
+    needs: consumer-artifact
     strategy:
       fail-fast: false
       matrix:
@@ -139,13 +180,14 @@ jobs:
       - name: Retrieve the exact Maven candidate
         env:
           GH_TOKEN: ${{ github.token }}
+          CANDIDATE_RUN: ${{ needs.consumer-artifact.outputs.run }}
         shell: bash
-        run: gh run download "$GITHUB_RUN_ID" --name maven-candidate --dir build/candidate-maven
+        run: gh run download "$CANDIDATE_RUN" --name maven-candidate --dir build/candidate-maven
       - name: Install Linux graphical runtime dependencies
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-3-0t64 libgl1 libgl1-mesa-dri libxrender1 libxtst6 libxi6 libxrandr2
+          sudo apt-get install -y libgtk-3-0t64 libegl1 libgl1 libgl1-mesa-dri libxrender1 libxtst6 libxi6 libxrandr2
       - name: Exercise the published WebView with both Gradle and Maven metadata
         shell: bash
         run: |
@@ -169,6 +211,7 @@ jobs:
 
   candidate-notices:
     needs: [stage-maven, webview-consumer, webview-browser, webview-android, webview-ios]
+    if: inputs.candidate_run == ''
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -183,8 +226,7 @@ jobs:
         run: python3 scripts/publishing/verify_candidate.py --repository build/candidate-maven --require-native-notices
 
   webview-browser:
-    needs: stage-maven
-    if: ${{ always() && needs.stage-maven.outputs.candidate-artifact != '' }}
+    needs: consumer-artifact
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
@@ -198,7 +240,8 @@ jobs:
       - name: Retrieve the exact Maven candidate
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh run download "$GITHUB_RUN_ID" --name maven-candidate --dir build/candidate-maven
+          CANDIDATE_RUN: ${{ needs.consumer-artifact.outputs.run }}
+        run: gh run download "$CANDIDATE_RUN" --name maven-candidate --dir build/candidate-maven
       - name: Run the independent JS and Wasm browser WebView tests
         run: |
           version="$(python3 -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')"
@@ -213,8 +256,7 @@ jobs:
           path: tests/publishing/webview-browser/build/test-results/**/TEST-*.xml
 
   webview-android:
-    needs: stage-maven
-    if: ${{ always() && needs.stage-maven.outputs.candidate-artifact != '' }}
+    needs: consumer-artifact
     strategy:
       fail-fast: false
       matrix:
@@ -232,7 +274,8 @@ jobs:
       - name: Retrieve the exact Maven candidate
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh run download "$GITHUB_RUN_ID" --name maven-candidate --dir build/candidate-maven
+          CANDIDATE_RUN: ${{ needs.consumer-artifact.outputs.run }}
+        run: gh run download "$CANDIDATE_RUN" --name maven-candidate --dir build/candidate-maven
       - name: Run the independent Android WebView instrumentation test
         env:
           ANDROID_API: ${{ matrix.api }}
@@ -248,8 +291,7 @@ jobs:
             tests/publishing/webview-android/build/emulator.log
 
   webview-ios:
-    needs: stage-maven
-    if: ${{ always() && needs.stage-maven.outputs.candidate-artifact != '' }}
+    needs: consumer-artifact
     runs-on: macos-26
     timeout-minutes: 45
     steps:
@@ -263,7 +305,8 @@ jobs:
       - name: Retrieve the exact Maven candidate
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh run download "$GITHUB_RUN_ID" --name maven-candidate --dir build/candidate-maven
+          CANDIDATE_RUN: ${{ needs.consumer-artifact.outputs.run }}
+        run: gh run download "$CANDIDATE_RUN" --name maven-candidate --dir build/candidate-maven
       - name: Run the standalone iOS simulator app against published WKWebView
         run: |
           version="$(python3 -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')"

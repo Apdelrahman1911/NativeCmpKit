@@ -7,11 +7,12 @@ api=$3
 project="$PWD/tests/publishing/webview-android"
 export ANDROID_AVD_HOME="$project/build/avd"
 export ANDROID_USER_HOME="$project/build/android-user"
+export PATH="$ANDROID_HOME/platform-tools:$PATH"
 mkdir -p "$ANDROID_AVD_HOME" "$ANDROID_USER_HOME"
 
 sdk_tools="$ANDROID_HOME/cmdline-tools/latest/bin"
 image="system-images;android-$api;google_apis;x86_64"
-"$sdk_tools/sdkmanager" 'platforms;android-37.0' "$image"
+"$sdk_tools/sdkmanager" 'platforms;android-37.0' 'platform-tools' 'emulator' "$image"
 printf 'no\n' | "$sdk_tools/avdmanager" create avd --name kira-consumer --package "$image"
 sudo chown "$USER" /dev/kvm
 "$ANDROID_HOME/emulator/emulator" @kira-consumer -no-window -no-audio -no-boot-anim \
