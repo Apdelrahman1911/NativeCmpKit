@@ -1,7 +1,22 @@
-# nativeCmpkit migration: historical response/log bytes are integrity evidence.
+# NativeCmpKit migration: historical response/log bytes are integrity evidence.
 # Do not let platform checkout newline conversion invalidate their digests.
 docs/migration/upstream-metadata/** -text -whitespace
 docs/migration/git/** -text -whitespace
 docs/migration/legacy/** -text -whitespace
 docs/testing/evidence/** -text -whitespace
 *.bundle -diff
+
+# The native manifests compare the exact source bytes across all five builders.
+/kira-file-picker/native/** text eol=lf
+/kira-file-picker/src/desktopMain/kotlin/** text eol=lf
+/kira-file-picker/build.gradle.kts text eol=lf
+/kira-file-picker/.cargo/* text eol=lf
+/kira-share/native/** text eol=lf
+/kira-share/src/desktopMain/kotlin/** text eol=lf
+/kira-share/build.gradle.kts text eol=lf
+/kira-share/.cargo/* text eol=lf
+/.cargo/* text eol=lf
+/rust-toolchain.toml text eol=lf
+/scripts/native/artifacts.py text eol=lf
+/convention-plugins/src/main/kotlin/NativeLibraries.kt text eol=lf
+/licenses/native-cargo/** -text -whitespace

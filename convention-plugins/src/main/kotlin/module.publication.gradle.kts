@@ -11,7 +11,10 @@ val noticeFiles = files(repositoryRoot.file("LICENSE"), repositoryRoot.file("NOT
 val publicationNotices = tasks.register<Zip>("publicationNotices") {
     archiveClassifier.set("notices")
     from(noticeFiles)
-    from(repositoryRoot.dir("licenses")) { into("licenses") }
+    from(repositoryRoot.dir("licenses")) {
+        into("licenses")
+        exclude("native-cargo/**")
+    }
     if (component in setOf("kira-file-picker", "kira-share")) {
         from(rootProject.layout.buildDirectory.dir("native-notices/$component")) {
             into("native-dependencies")

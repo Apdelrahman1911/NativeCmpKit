@@ -30,6 +30,7 @@ class PublishedWebViewTest {
         assertTrue(!GraphicsEnvironment.isHeadless(), "A graphical desktop is required")
 
         val state = WebViewState(WebContent.Data("<html><title>Kira consumer</title><body>Owned fixture</body></html>"))
+        state.settings.javaScriptEnabled = true
         val created = AtomicInteger()
         val disposed = AtomicInteger()
         val (panel, window) = onEdt {
