@@ -3,14 +3,13 @@ package io.github.apdelrahman1911.kira.io
 import io.github.apdelrahman1911.kira.core.InternalKiraApi
 import io.github.apdelrahman1911.kira.core.PlatformContext
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.addressOf
-import kotlinx.cinterop.usePinned
+import kotlinx.io.IOException
+import kotlinx.io.files.FileNotFoundException
 import platform.Foundation.NSData
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
 import platform.Foundation.NSURLIsDirectoryKey
 import platform.Foundation.dataWithContentsOfURL
-import platform.posix.memcpy
 
 /**
  * A wrapper class for a file in the platform-specific implementation.
@@ -33,12 +32,15 @@ actual fun KmpFile.exists(context: PlatformContext): Boolean {
 
 @OptIn(ExperimentalForeignApi::class)
 actual suspend fun KmpFile.readByteArray(context: PlatformContext): ByteArray {
-    val data = NSData.dataWithContentsOfURL(url) ?: return ByteArray(0)
-    val byteArraySize: Int = if (data.length > Int.MAX_VALUE.toUInt()) Int.MAX_VALUE else data.length.toInt()
-    return ByteArray(byteArraySize).apply {
-        usePinned {
-            memcpy(it.addressOf(0), data.bytes, data.length)
-        }
+    if (!url.isFileURL() || url.path == null) {
+        throw FileNotFoundException("iOS KmpFile content requires a file: URL with a filesystem path")
+    }
+    val accessing = url.startAccessingSecurityScopedResource()
+    try {
+        val data = NSData.dataWithContentsOfURL(url) ?: throw IOException("Could not read the file")
+        return data.toCheckedByteArray()
+    } finally {
+        if (accessing) url.stopAccessingSecurityScopedResource()
     }
 }
 

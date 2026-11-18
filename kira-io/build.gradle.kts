@@ -17,6 +17,10 @@ kotlin {
         implementation(libs.kotlinx.coroutines.core)
     }
 
+    sourceSets.iosTest.dependencies {
+        implementation(libs.kotlinx.coroutines.test)
+    }
+
     sourceSets.androidMain.dependencies {
         implementation(libs.documentfile)
     }

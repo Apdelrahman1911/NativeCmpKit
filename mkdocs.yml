@@ -4,7 +4,6 @@
 site_name: 'NativeCmpKit'
 site_description: 'A library that allows you to easily create adaptive UIs and access platform specific APIs from your Compose Multiplatform apps.'
 site_author: 'Abdelrahman Fahmy and NativeCmpKit contributors'
-site_url: 'https://apdelrahman1911.github.io/NativeCmpKit/'
 # Reserved for a future owner-authorized deployment; preserved upstream gh-pages is immutable.
 remote_branch: nativecmpkit-pages
 edit_uri: ""

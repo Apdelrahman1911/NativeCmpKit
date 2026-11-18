@@ -35,6 +35,7 @@ kotlin {
     }
 
     sourceSets.desktopTest.dependencies {
+        implementation(libs.kotlin.test)
         javaFx.forEach { implementation(it) }
     }
 
