@@ -26,8 +26,8 @@ Device-only behavior awaits physical-device checks. Consult the
 ## Install
 
 Add `google()` and `mavenCentral()` to the repositories used for dependency
-resolution. Use `0.1.0-preview.1` for the first preview when it appears on
-[Maven Central](https://central.sonatype.com/namespace/io.github.apdelrahman1911.nativecmpkit).
+resolution. The first preview, `0.1.0-preview.1`, is on
+[Maven Central](https://central.sonatype.com/artifact/io.github.apdelrahman1911.nativecmpkit/kira-core/0.1.0-preview.1).
 Use compatible Compose Multiplatform and Kotlin versions. The preview is built
 with Compose Multiplatform 1.12.0 and Kotlin 2.4.20.
 
@@ -38,6 +38,7 @@ kotlin {
     sourceSets.commonMain.dependencies {
         implementation("io.github.apdelrahman1911.nativecmpkit:kira-ui:0.1.0-preview.1")
         implementation("io.github.apdelrahman1911.nativecmpkit:kira-file-picker:0.1.0-preview.1")
+        implementation("org.jetbrains.compose.material3:material3:1.12.0-alpha03")
     }
 }
 ```

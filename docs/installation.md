@@ -1,8 +1,8 @@
 # Installation and development
 
-The first release candidate uses version `0.1.0-preview.1` under
-`io.github.apdelrahman1911.nativecmpkit`. Follow the [GitHub releases](https://github.com/Apdelrahman1911/NativeCmpKit/releases)
-for publication status and release notes.
+The first Maven Central release uses version `0.1.0-preview.1` under
+`io.github.apdelrahman1911.nativecmpkit`. See the [GitHub releases](https://github.com/Apdelrahman1911/NativeCmpKit/releases)
+for changes and release verification.
 
 ## Components
 
