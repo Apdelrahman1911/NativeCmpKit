@@ -1,7 +1,8 @@
 # Installation and development
 
 The first release candidate uses version `0.1.0-preview.1` under
-`io.github.apdelrahman1911.nativecmpkit`. These coordinates are pending publication.
+`io.github.apdelrahman1911.nativecmpkit`. Follow the [GitHub releases](https://github.com/Apdelrahman1911/NativeCmpKit/releases)
+for publication status and release notes.
 
 ## Components
 
@@ -38,7 +39,7 @@ guides](platforms/README.md) for runtime availability by feature.
 `kira-permissions` is an optional bundle of permission components. For a single
 permission, choose its leaf artifact. No toolkit-wide bundle is required.
 
-For example, after publication, add `mavenCentral()` and declare:
+For example, add `mavenCentral()` and declare:
 
 ```kotlin
 implementation("io.github.apdelrahman1911.nativecmpkit:kira-ui:0.1.0-preview.1")

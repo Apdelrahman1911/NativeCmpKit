@@ -88,6 +88,31 @@ def verified_pages_resolution(incident: dict, current_pages: dict) -> bool:
     return all(digest(safe_child(path.parent, name)) == expected for name, expected in hashes.items())
 
 
+
+def safe_workflow(name: str, source: str) -> bool:
+    if re.search(r"publishAndRelease|gh-deploy|actions-netlify|(?:pages|pull-requests|id-token):\s*write", source):
+        return False
+    if name != "release.yml":
+        return "contents: read" in source and not re.search(
+            r"contents:\s*write|central_release.py publish|cargo publish", source)
+    triggers = source.split("\non:\n", 1)[-1].split("\npermissions:", 1)[0]
+    publisher = source.split("\n  publish:\n", 1)[-1].split("\n  consume:", 1)[0]
+    receipt = source.split("\n  github-release:\n", 1)[-1]
+    return (
+        triggers.strip() == "push:\n    tags: ['v*']"
+        and "\npermissions:\n  contents: read\n" in source
+        and "git merge-base --is-ancestor" in source
+        and "needs.verify.result == 'success'" in publisher
+        and "environment: maven-central" in publisher
+        and "central_release.py publish" in publisher
+        and source.count("central_release.py publish") == 1
+        and source.count("contents: write") == 1
+        and "contents: write" in receipt
+        and "needs.consume.result == 'success'" in receipt
+        and source.count("secrets.") == publisher.count("secrets.") == 4
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--remote", action="store_true", help="Also read destination refs/settings using git and gh; no writes")
@@ -175,9 +200,8 @@ def main() -> int:
 
         for workflow in (ROOT / ".github/workflows").glob("*.yml"):
             source = workflow.read_text()
-            check("read_only_workflow_" + workflow.name,
-                  not re.search(r"publishAndRelease|gh-deploy|actions-netlify|contents:\s*write|pull-requests:\s*write", source),
-                  "No inherited publishing/deployment or write-token permissions")
+            check("workflow_permissions_" + workflow.name, safe_workflow(workflow.name, source),
+                  "Verification is read-only. The authorized release publishes only from a validated main tag.")
             for action in re.findall(r"uses:\s*([^\s]+)", source):
                 if not action.startswith("./"):
                     check("pinned_action_" + action, bool(re.search(r"@[0-9a-f]{40}$", action)), workflow.name)
@@ -243,31 +267,44 @@ def main() -> int:
                       "No Pages configuration reported; CDN/cache expiration is not tested")
                 report["pages_unpublishing_verified"] = True
             actions = json.loads(command("gh", "api", f"repos/{repo}/actions/permissions"))
-            check("github_actions_disabled", actions.get("enabled") is False, actions)
-            releases = json.loads(command("gh", "api", f"repos/{repo}/releases?per_page=100"))
-            check("no_releases_created", len(releases) == 0, "Historical release JSON is archived, not republished")
+            check("github_actions_enabled_with_sha_pinning", actions.get("enabled") is True and
+                  actions.get("allowed_actions") == "selected" and actions.get("sha_pinning_required") is True, actions)
+            releases = json_pages(command("gh", "api", "--paginate", f"repos/{repo}/releases?per_page=100"))
+            known_upstream_tags = {ref.removeprefix("refs/tags/") for ref in expected if ref.startswith("refs/tags/")}
+            check("upstream_releases_still_archived", all(
+                release["tag_name"] not in known_upstream_tags for page in releases for release in page),
+                "Upstream release records are retained in the archive. NativeCmpKit publishes new tags.")
             deployment_pages = json_pages(command("gh", "api", "--paginate", f"repos/{repo}/deployments?per_page=100"))
             if not all(isinstance(page, list) for page in deployment_pages):
                 raise ValueError("Unexpected deployment response shape")
             deployments = [deployment for page in deployment_pages for deployment in page]
             known = {item["id"]: item for item in incident["disclosed_deployments"]}
-            check("no_undisclosed_deployments", all(
-                deployment["id"] in known and
-                all(deployment[field] == known[deployment["id"]][field] for field in ("ref", "sha", "environment", "created_at")) and
-                deployment["creator"]["login"] == known[deployment["id"]]["creator"]
-                for deployment in deployments),
-                {"observed_ids": [d["id"] for d in deployments], "disclosed_incident_ids": sorted(known),
-                 "scope": "The unintended legacy Pages event is retained, not hidden or recreated as a nativeCmpkit release"})
+            for deployment in deployments:
+                if deployment["environment"] == "maven-central":
+                    tag = deployment["ref"].removeprefix("refs/tags/")
+                    check("authorized_release_deployment_" + str(deployment["id"]),
+                          deployment["sha"] == command("git", "rev-parse", f"refs/tags/{tag}^{{commit}}").strip()
+                          and "environment: maven-central" in command("git", "show", deployment["sha"] + ":.github/workflows/release.yml"),
+                          {"tag": tag, "sha": deployment["sha"]})
+                    continue
+                receipt = known.get(deployment["id"])
+                check("disclosed_legacy_deployment_" + str(deployment["id"]), receipt is not None and
+                      all(deployment[field] == receipt[field] for field in ("ref", "sha", "environment", "created_at")) and
+                      deployment["creator"]["login"] == receipt["creator"], "Legacy Pages deployment matches the retained incident.")
             pages = json_pages(command("gh", "api", "--paginate", f"repos/{repo}/actions/runs?per_page=100"))
             runs = [run for page in pages for run in page["workflow_runs"]]
-            approved = {".github/workflows/gradle.yml", ".github/workflows/build-native-libs.yml"}
+            approved = {
+                ".github/workflows/gradle.yml": {"workflow_dispatch", "push", "pull_request"},
+                ".github/workflows/build-native-libs.yml": {"workflow_dispatch"},
+                ".github/workflows/release.yml": {"push"},
+            }
             for run in runs:
-                check("approved_verification_run_" + str(run["id"]), run["path"] in approved and run["event"] == "workflow_dispatch" and run["status"] == "completed",
+                check("approved_workflow_run_" + str(run["id"]), run["event"] in approved.get(run["path"], ()),
                       {k: run[k] for k in ("id", "path", "head_sha", "event", "status", "conclusion")})
                 if not SHA.fullmatch(run["head_sha"]): raise ValueError("Invalid workflow revision")
                 workflow = command("git", "show", run["head_sha"] + ":" + run["path"])
-                check("read_only_executed_workflow_" + str(run["id"]), "contents: read" in workflow and not re.search(r"publishAndRelease|gh-deploy|actions-netlify|contents:\s*write|pull-requests:\s*write|cargo publish", workflow),
-                      "Approved workflow source at its executed revision; report artifacts are not releases/packages")
+                check("executed_workflow_permissions_" + str(run["id"]), safe_workflow(Path(run["path"]).name, workflow),
+                      "Permissions and publishing scope checked against the executed workflow source.")
             report["verification_workflow_runs"] = [run["id"] for run in runs]
             remote = dict(line.split()[::-1] for line in command("git", "ls-remote", "--refs", f"https://github.com/{repo}.git").splitlines())
             preserved = {ref: oid for ref, oid in expected.items() if ref.startswith(("refs/heads/", "refs/tags/")) and ref != "refs/heads/main"}

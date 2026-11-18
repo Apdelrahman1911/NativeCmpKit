@@ -73,6 +73,8 @@ mavenPublishing {
             connection.set("scm:git:https://github.com/Apdelrahman1911/NativeCmpKit.git")
             developerConnection.set("scm:git:ssh://git@github.com/Apdelrahman1911/NativeCmpKit.git")
             url.set("https://github.com/Apdelrahman1911/NativeCmpKit")
+            tag.set(providers.gradleProperty("release.tag"))
         }
+        providers.gradleProperty("release.revision").orNull?.let { properties.put("releaseSourceRevision", it) }
     }
 }

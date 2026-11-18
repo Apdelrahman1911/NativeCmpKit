@@ -7,6 +7,11 @@ on:
         description: Prior full staging run ID for WebView consumer rechecks only
         type: string
         required: false
+  workflow_call:
+    inputs:
+      release_version:
+        type: string
+        required: true
 
 permissions:
   contents: read
@@ -14,10 +19,11 @@ permissions:
 
 env:
   CARGO_BUILD_JOBS: '2'
+  RELEASE_VERSION: ${{ inputs.release_version || '' }}
 
 jobs:
   native-check:
-    if: inputs.candidate_run == ''
+    if: (inputs.candidate_run || '') == ''
     strategy:
       fail-fast: false
       matrix:
@@ -44,8 +50,8 @@ jobs:
       - name: Produce and verify locked native payloads
         shell: bash
         run: |
-          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          version="$(python -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')"
+          test "$(git rev-parse HEAD)" = "$(git rev-parse "$GITHUB_SHA^{commit}")"
+          version="${RELEASE_VERSION:-$(python -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')}"
           for module in kira-file-picker kira-share; do
             python scripts/native/artifacts.py --module "$module" --platform "$NATIVE_PLATFORM" \
               --version "$version" --output "$PWD/build/native-payload/$module" \
@@ -84,7 +90,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh run download "$GITHUB_RUN_ID" --pattern 'native-payload-*' --dir build/downloaded-native
-          version="$(python3 -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')"
+          version="${RELEASE_VERSION:-$(python3 -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')}"
           python3 -m scripts.publishing.assemble_native build/downloaded-native build/native-release "$version"
       - name: Install configured Android platform on the runner
         run: |
@@ -99,13 +105,17 @@ jobs:
           python3 -m scripts.publishing.collect_native_notices "${CARGO_HOME:-$HOME/.cargo}"
       - name: Stage and verify the complete unsigned Maven candidate
         run: |
-          version="$(python3 -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')"
+          version="${RELEASE_VERSION:-$(python3 -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')}"
+          release_metadata=()
+          if [ -n "$RELEASE_VERSION" ]; then
+            release_metadata=("-Prelease.tag=$GITHUB_REF_NAME" "-Prelease.revision=$(git rev-parse HEAD)")
+          fi
           ./gradlew --no-daemon --no-configuration-cache --no-parallel --max-workers=1 \
             '-Dorg.gradle.jvmargs=-Xmx3072m -Dfile.encoding=UTF-8' \
             -Pkotlin.compiler.execution.strategy=in-process -Pnativecmpkit.verification=true \
             -Pnativecmpkit.version="$version" -PnativecmpkitNativeMode=release \
             -PnativecmpkitNativePrebuiltDir="$PWD/build/native-release" \
-            -Dmaven.repo.local="$PWD/build/candidate-maven" publishToMavenLocal
+            -Dmaven.repo.local="$PWD/build/candidate-maven" "${release_metadata[@]}" publishToMavenLocal
           python3 scripts/publishing/verify_candidate.py --repository build/candidate-maven \
             --prepare-consumers build/clean-consumer
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
@@ -124,15 +134,31 @@ jobs:
             compileCommonMainKotlinMetadata compileAndroidMain verifyDesktopResolution \
             compileKotlinIosArm64 compileKotlinIosSimulatorArm64 compileKotlinJs compileKotlinWasmJs
 
+      - name: Run and count the iOS Foundation read regressions
+        if: inputs.release_version != ''
+        run: |
+          ./gradlew --no-daemon --no-configuration-cache --max-workers=1 \
+            '-Dorg.gradle.jvmargs=-Xmx3072m -Dfile.encoding=UTF-8' \
+            -Pkotlin.compiler.execution.strategy=in-process :kira-io:iosSimulatorArm64Test
+          python3 - <<'PYTEST'
+          from pathlib import Path
+          from xml.etree import ElementTree as ET
+          cases = [case for path in Path('kira-io/build/test-results').rglob('TEST-*.xml')
+                   for case in ET.parse(path).iter('testcase')
+                   if case.get('classname', '').endswith(('NativeGuardedCopyTest', 'NativeReadSafetyTest'))]
+          assert len(cases) == 8 and not any(child.tag in {'skipped', 'failure', 'error'} for case in cases for child in case)
+          print('Eight iOS Foundation/guard-page regression tests passed.')
+          PYTEST
+
   consumer-artifact:
     needs: stage-maven
-    if: ${{ always() && (inputs.candidate_run != '' || needs.stage-maven.outputs.candidate-artifact != '') }}
+    if: ${{ always() && ((inputs.candidate_run || '') != '' || needs.stage-maven.outputs.candidate-artifact != '') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     outputs:
       run: ${{ steps.select.outputs.run }}
     steps:
-      - if: inputs.candidate_run != ''
+      - if: (inputs.candidate_run || '') != ''
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
           fetch-depth: 0
@@ -192,7 +218,7 @@ jobs:
       - name: Exercise the published WebView with both Gradle and Maven metadata
         shell: bash
         run: |
-          version="$(python -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')"
+          version="${RELEASE_VERSION:-$(python -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')}"
           runner=()
           if [ "$RUNNER_OS" = Linux ]; then runner=(xvfb-run -a); fi
           status=0
@@ -212,7 +238,7 @@ jobs:
 
   candidate-notices:
     needs: [stage-maven, webview-consumer, webview-browser, webview-android, webview-ios]
-    if: inputs.candidate_run == ''
+    if: (inputs.candidate_run || '') == ''
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -246,7 +272,7 @@ jobs:
         run: gh run download "$CANDIDATE_RUN" --name maven-candidate --dir build/candidate-maven
       - name: Run the independent JS and Wasm browser WebView tests
         run: |
-          version="$(python3 -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')"
+          version="${RELEASE_VERSION:-$(python3 -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')}"
           ./gradlew -p tests/publishing/webview-browser --no-daemon --max-workers=1 \
             '-Dorg.gradle.jvmargs=-Xmx3072m -Dfile.encoding=UTF-8' -Pkotlin.compiler.execution.strategy=in-process \
             -PnativecmpkitVersion="$version" -PnativecmpkitRepository="$PWD/build/candidate-maven" \
@@ -283,7 +309,7 @@ jobs:
         env:
           ANDROID_API: ${{ matrix.api }}
         run: |
-          version="$(python3 -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')"
+          version="${RELEASE_VERSION:-$(python3 -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')}"
           bash tests/publishing/webview-android/run-hosted.sh "$PWD/build/candidate-maven" "$version" "$ANDROID_API"
       - if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
@@ -313,7 +339,7 @@ jobs:
         run: gh run download "$CANDIDATE_RUN" --name maven-candidate --dir build/candidate-maven
       - name: Run the standalone iOS simulator app against published WKWebView
         run: |
-          version="$(python3 -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')"
+          version="${RELEASE_VERSION:-$(python3 -c 'import json; print(json.load(open("docs/publishing/coordinates.json"))["candidateVersion"])')}"
           bash tests/publishing/webview-ios/run-hosted.sh "$PWD/build/candidate-maven" "$version"
       - if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9

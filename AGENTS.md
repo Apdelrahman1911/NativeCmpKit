@@ -26,16 +26,14 @@ Pages off and preserve licensed attribution, archived evidence and Git history.
   revisions for CI/consumer evidence, not a concurrently changing source tree.
 - Existing sample applications are not substitutes for library integration tests.
   Native functionality, cancellation/concurrency/ownership, artifact consumers and
-  API compatibility need explicit tests. Device-only gaps remain release gates.
+  API compatibility need explicit tests. For this first preview the owner accepts
+  the verified hosted matrix. Report device-only gaps separately.
 - The first Kira release changes package and JNI names together. Preserve behavior,
   record migration steps and compile independent consumers. Keep subsequent API
   changes additive where practical.
-- No Central/signing credentials were observed through repository/environment
-  secret-name or local-property presence checks. GitHub Packages is a possible
-  first Maven destination using a tightly scoped Actions token **after** gates;
-  that route requires authenticated consumer instructions. Do not print credentials
-  or claim Central availability. Keep prospective publication automation inert until
-  the gate passes; never enable Pages or old imported release workflows.
+- The tag-based workflow publishes to Maven Central only after validation, using
+  the tag-restricted `maven-central` environment. Never print credentials or claim
+  availability before public readback. Pages and imported release workflows stay off.
 
 ## Safety and scope
 - Independent successor to Apache-2.0 Calf. Preserve upstream authorship, copyright, LICENSE, Git objects, branches, tags, and attribution. Never rewrite imported history or modify/push to upstream.
@@ -167,19 +165,13 @@ No physical-device/native-UI/JNI integration or ABI certification is implied.
 
 `scripts/audit/summarize_junit.py` summarizes XML without storing console bodies;
 it rejects DTD/entities. Workflow artifacts contain reports only, not packages.
-Current workflows have read-only token permissions and pinned actions. Actions
-are disabled outside owner-authorized/supervised verification; do not leave old
-branches' inherited deployment workflows executable when enabling Actions.
-Disabling Actions resets the API's reported SHA-pinning flag. Before another
-supervised run, explicitly restore and verify the **exact six-action allowlist**
+CI has read-only token permissions. The tag workflow grants `contents: write`
+only to the job that records the verified GitHub Release. The owner authorized
+leaving Actions enabled with pinned actions. Keep the **six-action allowlist**
 and `sha_pinning_required=true` recorded in
 `docs/testing/evidence/github-actions/gradle-corrected-dispatch-20261024.json`,
-with blanket GitHub-owned/verified-action allowances both false. Do not merely
-toggle `enabled=true` and assume the previous policy survived. Avoid pushes during
-a run: the current workflow has a push trigger and cancellation concurrency.
-After terminal completion, disable Actions using the minimal `enabled=false`
-update and verify it before a final push; combined disabled/policy updates were
-rejected in this migration.
+with blanket GitHub-owned/verified-action allowances both false. Keep historical
+deployment workflows inert. Ordinary CI runs on `main` pushes and pull requests.
 Inspect **Pages separately**: GitHub recorded an unintended legacy deployment of
 the imported historical `gh-pages` ref during migration, although no deployment
 was requested. The exact internal activation mechanism is not proven.

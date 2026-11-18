@@ -1,4 +1,4 @@
-# Platform capabilities: implemented is not verified
+# Platform capabilities
 
 This matrix describes NativeCmpKit target declarations and the capabilities of
 the Kira modules. See [testing](../testing/README.md) for executed verification.
@@ -52,9 +52,8 @@ requires the corresponding audit findings and platform verification.
 | Media player | **—: excluded project, no implementation** | — | — | — | — |
 | Notification scheduling | **—: excluded experiment** | — | — | — | — |
 
-This is deliberately not a green/red “supported everywhere” table. For example,
-the web library targets can build without implementing camera, while a native
-mobile picker may exist but have confirmed correctness defects.
+Feature coverage depends on the platform. Browser targets can resolve `kira-camera-picker`,
+where camera launch remains a no-op.
 
 ### Source evidence for unsupported/limited cells
 

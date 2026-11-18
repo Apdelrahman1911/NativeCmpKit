@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import shutil
 from xml.etree import ElementTree
@@ -127,7 +128,7 @@ def verify_native_notices(repository):
 
 def prepare_consumers(destination):
     shutil.copytree(ROOT / "tests/publishing/consumer", destination)
-    (destination / "coordinates.json").write_text(json.dumps(MANIFEST, indent=2) + "\n")
+    (destination / "coordinates.json").write_text(json.dumps({**MANIFEST, "candidateVersion": VERSION}, indent=2) + "\n")
     for name, module in MODULES.items():
         symbol = module["consumerSymbol"]
         package, member = symbol.rsplit(".", 1)
@@ -148,12 +149,15 @@ fun consumerPermission(): Permission = Permission.{member}
 
 
 def main():
+    global VERSION
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repository", type=Path)
     parser.add_argument("--require-native-notices", action="store_true")
     parser.add_argument("--producer-poms", action="store_true")
     parser.add_argument("--prepare-consumers", type=Path)
+    parser.add_argument("--version", default=os.environ.get("RELEASE_VERSION") or VERSION)
     args = parser.parse_args()
+    VERSION = args.version
     if args.producer_poms:
         for module, entry in MODULES.items():
             publications = ROOT / entry["directory"] / "build/publications"

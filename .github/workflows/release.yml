@@ -1,0 +1,120 @@
+name: Release to Maven Central
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: maven-central-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.repository == 'Apdelrahman1911/NativeCmpKit'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      version: ${{ steps.validate.outputs.version }}
+      revision: ${{ steps.validate.outputs.revision }}
+      already_public: ${{ steps.validate.outputs.already_public }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify release tag, main ancestry, and version availability
+        id: validate
+        run: |
+          test "$GITHUB_REF_TYPE" = tag
+          revision="$(git rev-parse "$GITHUB_REF^{commit}")"
+          test "$(git rev-parse HEAD)" = "$revision"
+          git merge-base --is-ancestor "$revision" origin/main
+          python3 scripts/publishing/central_release.py check --inventory docs/publishing/coordinates.json \
+            --tag "$GITHUB_REF_NAME" --revision "$revision"
+
+  verify:
+    needs: prepare
+    if: needs.prepare.outputs.already_public == 'false'
+    uses: ./.github/workflows/build-native-libs.yml
+    with:
+      release_version: ${{ needs.prepare.outputs.version }}
+
+  publish:
+    needs: [prepare, verify]
+    if: needs.verify.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    environment: maven-central
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: Retrieve and verify the validated Maven stage
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          gh run download "$GITHUB_RUN_ID" --name maven-candidate --dir build/candidate-maven
+          python3 scripts/publishing/verify_candidate.py --repository build/candidate-maven --require-native-notices
+      - name: Sign, publish, and verify Maven Central readback
+        env:
+          RELEASE_REVISION: ${{ needs.prepare.outputs.revision }}
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_PASSPHRASE: ${{ secrets.SIGNING_PASSPHRASE }}
+        run: |
+          python3 scripts/publishing/central_release.py publish --inventory docs/publishing/coordinates.json \
+            --tag "$GITHUB_REF_NAME" --revision "$RELEASE_REVISION" \
+            --repository build/candidate-maven --bundle build/central/release.zip
+
+  consume:
+    needs: [prepare, publish]
+    if: ${{ !cancelled() && needs.prepare.result == 'success' && (needs.publish.result == 'success' || needs.prepare.outputs.already_public == 'true') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Resolve and run a clean Maven Central consumer
+        env:
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          ./gradlew -p tests/publishing/public-consumer --no-daemon --max-workers=1 \
+            -P"libraryVersion=$RELEASE_VERSION" run
+
+  github-release:
+    needs: [prepare, consume]
+    if: ${{ !cancelled() && needs.consume.result == 'success' }}
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: Record the published version on GitHub
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          remote="$(git ls-remote origin "refs/tags/$GITHUB_REF_NAME" "refs/tags/$GITHUB_REF_NAME^{}")"
+          test "$(git rev-parse HEAD)" = "$(awk 'END {print $1}' <<< "$remote")"
+          if gh release view "$GITHUB_REF_NAME" --json url,isDraft --jq 'select(.isDraft == false) | .url' > build-release-url; then
+            if [ -s build-release-url ]; then cat build-release-url; exit; fi
+          fi
+          notes=(--generate-notes)
+          if [ -f "docs/releases/$RELEASE_VERSION.md" ]; then notes=(--notes-file "docs/releases/$RELEASE_VERSION.md"); fi
+          classification=()
+          if [[ "$RELEASE_VERSION" == *-* ]]; then classification=(--prerelease); fi
+          gh release create "$GITHUB_REF_NAME" --verify-tag --title "NativeCmpKit $RELEASE_VERSION" "${notes[@]}" "${classification[@]}"
