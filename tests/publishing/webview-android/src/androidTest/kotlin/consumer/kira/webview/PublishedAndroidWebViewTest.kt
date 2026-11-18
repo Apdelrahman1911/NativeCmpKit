@@ -3,8 +3,9 @@ package consumer.kira.webview
 import android.os.SystemClock
 import androidx.test.core.app.ActivityScenario
 import io.github.apdelrahman1911.kira.ui.web.LoadingState
-import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicReference
 import org.json.JSONTokener
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -18,13 +19,18 @@ class PublishedAndroidWebViewTest {
                 it.created == 1 && it.state.loadingState == LoadingState.Finished &&
                     it.state.pageTitle == it.titleText && it.state.webView?.isAttachedToWindow == true
             }
-            val result = CompletableFuture<String?>()
+            val javascriptFinished = CountDownLatch(1)
+            val result = AtomicReference<String?>()
             var title = ""
             scenario.onActivity {
                 title = it.titleText
-                it.state.evaluateJavascript("document.title") { value -> result.complete(value) }
+                it.state.evaluateJavascript("document.title") { value ->
+                    result.set(value)
+                    javascriptFinished.countDown()
+                }
             }
-            assertEquals(title, JSONTokener(result.get(15, TimeUnit.SECONDS)).nextValue())
+            assertTrue("The JavaScript callback was not called", javascriptFinished.await(15, TimeUnit.SECONDS))
+            assertEquals(title, JSONTokener(result.get()).nextValue())
             scenario.onActivity { it.showing.value = false }
             await(scenario, "Android WebView disposal") { it.disposed == 1 && it.state.webView == null }
         }
